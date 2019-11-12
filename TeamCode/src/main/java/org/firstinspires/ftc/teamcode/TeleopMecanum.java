@@ -47,8 +47,8 @@ public class TeleopMecanum extends OpMode
     public void loop()
     {
         //Convert gamepad data into custom variables
-        drive = -gamepad1.left_stick_y;
-        strafe = gamepad1.left_stick_x;
+        drive = Math.signum(-gamepad1.left_stick_y) * Math.pow(gamepad1.left_stick_y, 4);
+        strafe = Math.signum(gamepad1.left_stick_x) * Math.pow(gamepad1.left_stick_x, 4);
         rotate = gamepad1.right_stick_x;
 
         //Set wheel power according to input
