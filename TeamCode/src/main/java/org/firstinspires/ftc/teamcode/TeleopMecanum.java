@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-//Define Code Name for phone
+//Define Code Name for phon
 @TeleOp(name="TeleOpMecanum")
 public class TeleopMecanum extends OpMode
 {
