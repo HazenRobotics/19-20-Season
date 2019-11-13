@@ -158,13 +158,15 @@ public class TensorFlow extends LinearOpMode
         //Position to pick up skystone
 
         //Dive and pick up skystone
-        robot.move(4, 1, true);
+        robot.move(8, 1, true);
         robot.clapper(false);
 
         //Back up with skystone and rotate
         robot.move(6, 1, false);
 
         //move to the preplanned position
+        robot.turn(90,1,false,false);
+        sleep(250);
         robot.move(6, 1, true);
 
         //Run method to return place skystone on foundation
@@ -394,7 +396,7 @@ public class TensorFlow extends LinearOpMode
         {
             telemetry.addData("move to the left skystone position", "");
             skystoneLeft();
-        }
+            }
         else if (skystonePosition == Position.right)
         {
             telemetry.addData("move to the right skystone position", "");

@@ -147,16 +147,13 @@ public class AutonomousTensorFlowTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
+        /*
         robot.turnOnSpot(90,1, true);
         sleep(250);
+        */
 
-        robot.move(6, 1, false);
+        robot.move(36, 1, false);
         sleep(250);
-
-
-
-        robot.hooks(false);
-        sleep(500);
 
         tensorflow.tensorFlow();
         sleep(250);
