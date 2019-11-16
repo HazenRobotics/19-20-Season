@@ -25,8 +25,8 @@ import java.util.ArrayList;
 //@disabled
 public class TestTensorFlow extends LinearOpMode
 {
-    Robot robot = new Robot();
-    TensorFlow tensorflow = new TensorFlow();
+    Robot robot = new Robot(hardwareMap, this);
+    //TensorFlow tensorflow = new TensorFlow();
 
     //======================================================
     DcMotor leftMotor;
@@ -131,7 +131,7 @@ public class TestTensorFlow extends LinearOpMode
         //==========================================================================================
         //Pre init
 
-        tensorflow.initVuforia();
+        //tensorflow.initVuforia();
 
         waitForStart();
 
@@ -146,10 +146,10 @@ public class TestTensorFlow extends LinearOpMode
         //Official Start
 
 
-        tensorflow.tensorFlow();
+        //tensorflow.tensorFlow();
         sleep(250);
 
-        tensorflow.tensorFlowDrive();
+        //tensorflow.tensorFlowDrive();
 
         //hi
 

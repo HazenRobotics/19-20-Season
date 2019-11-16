@@ -26,8 +26,8 @@ import java.util.ArrayList;
 //@disabled
 public class AutonomousTest extends LinearOpMode
 {
-    Robot robot = new Robot();
-    TensorFlow tensorflow = new TensorFlow();
+    Robot robot = new Robot(hardwareMap, this);
+    TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
     //======================================================
     DcMotor leftMotor;
@@ -205,7 +205,7 @@ public class AutonomousTest extends LinearOpMode
         tensorflow.tensorFlow();
         sleep(250);
 
-        tensorflow.tensorFlowDrive();
+        robot.tensorFlowDrive();
 
 
 

@@ -29,9 +29,6 @@ import java.util.ArrayList;
 //@disabled
 public class AutonomousFoundationLeft extends LinearOpMode
 {
-    Robot robot = new Robot();
-    TensorFlow tensorflow = new TensorFlow();
-
     //======================================================
     DcMotor leftMotor;
     DcMotor rightMotor;
@@ -113,6 +110,9 @@ public class AutonomousFoundationLeft extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
+        Robot robot = new Robot(hardwareMap, this);
+        TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
+
         //arm = hardwareMap.servo.get("arm");
 
         //Map Hardware

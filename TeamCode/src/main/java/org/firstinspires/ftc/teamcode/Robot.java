@@ -1,15 +1,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.app.SharedElementCallback;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.android.AndroidGyroscope;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -18,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Robot extends LinearOpMode
+public class Robot
 {
     //======================================================
     DcMotor leftMotor;
@@ -56,6 +61,7 @@ public class Robot extends LinearOpMode
     final double linearWheelDistance = (Math.PI) * 4;
     final double linearSpoolDistance = (Math.PI) * 1.5748;
 
+
     //======================================================
     enum Position{none,left,right};
     Position skystonePosition;
@@ -70,27 +76,60 @@ public class Robot extends LinearOpMode
     //======================================================
     int shuffleCount = 0;
 
+    HardwareMap hardwareMap;
+    OpMode opMode;
+    Telemetry telemetry;
+
+    TensorFlow tensorFlow;
+
     //==============================================================================================
 
-    @Override
-    public void runOpMode() throws InterruptedException { }
+    //=========================================================================================
+    //Robot method
+    public Robot(HardwareMap hardwareMap, OpMode opMode)
+    {
+        //telemetry.addData("Robot", "setting up hardware");
+        //telemetry.update();
 
+        //arm = hardwareMap.servo.get("arm");
+        this.hardwareMap = hardwareMap;
+        this.opMode = opMode;
+        telemetry = opMode.telemetry;
+
+        //Map Hardware
+        lift = hardwareMap.dcMotor.get("lift");
+
+        rightMotor = hardwareMap.dcMotor.get("right_wheel");
+
+        leftHook = hardwareMap.servo.get("left_hook");
+        rightHook = hardwareMap.servo.get("right_hook");
+
+        leftClapper = hardwareMap.servo.get("left_clapper");
+        rightClapper = hardwareMap.servo.get("right_clapper");
+
+        gyro = hardwareMap.gyroSensor.get("gyro");
+
+        gyro.calibrate();
+
+        tensorFlow = new TensorFlow(hardwareMap, opMode);
+    }
     //=========================================================================================
     //Lift method
     public void setlift(double liftPower)
     {
-        telemetry.addData("setLift", "running");
-        telemetry.update();
+        //telemetry.addData("setLift", "running");
+        //telemetry.update();
 
         convertDistTicks(5.5, linearSpoolDistance);
     }
+
 
     //==========================================================================================
     //clapper method
     public void clapper(boolean clappersHome)
     {
-        telemetry.addData("clappers", "running");
-        telemetry.update();
+        //telemetry.addData("clappers", "running");
+        //telemetry.update();
 
         //set clappers position to their positions
         if(clappersHome)
@@ -112,8 +151,8 @@ public class Robot extends LinearOpMode
     //hook methd
     public void hooks(boolean hooksHome)
     {
-        telemetry.addData("hooks", "running");
-        telemetry.update();
+        //telemetry.addData("hooks", "running");
+        //telemetry.update();
 
         //set hooks positions to positions
         if(hooksHome)
@@ -146,8 +185,8 @@ public class Robot extends LinearOpMode
 
     public void move(double distanceToTravel,double power, boolean isForward)
     {
-        telemetry.addData("move", "running");
-        telemetry.update();
+        //telemetry.addData("move", "running");
+        //telemetry.update();
 
         // reset encoder count kept by left motor.
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -176,18 +215,17 @@ public class Robot extends LinearOpMode
         leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // wait while opmode is active and left motor is busy running to position.
-        while (opModeIsActive() && leftMotor.isBusy())
+        // wait while opmode is active and motors are busy running to position.
+
+        while (leftMotor.isBusy())
         {
             telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
             telemetry.update();
-            idle();
         }
-        while (opModeIsActive() && rightMotor.isBusy())
+        while (rightMotor.isBusy())
         {
             telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
             telemetry.update();
-            idle();
         }
 
         // set motor power to zero to turn off motors. The motors stop on their own but
@@ -200,8 +238,8 @@ public class Robot extends LinearOpMode
 
     public void turnOnSpot(double turningDegrees, double power, boolean turnLeft)
     {
-        telemetry.addData("turnOnSpot", "running");
-        telemetry.update();
+        //telemetry.addData("turnOnSpot", "running");
+        //telemetry.update();
 
         double turningNumber = (turningDegrees/180) * 16.4 * (Math.PI);
         double onSpotTurningNumber = turningNumber/2;
@@ -227,8 +265,8 @@ public class Robot extends LinearOpMode
     //turning method
     public void turn(double turningDegrees, double power, boolean isForward, boolean leftWheel)
     {
-        telemetry.addData("turn", "running");
-        telemetry.update();
+        //telemetry.addData("turn", "running");
+        //telemetry.update();
 
         // calculations from degrees to motor distance
 
@@ -268,10 +306,9 @@ public class Robot extends LinearOpMode
             leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (opModeIsActive() && leftMotor.isBusy()) {
+            while (leftMotor.isBusy()) {
                 telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
                 telemetry.update();
-                idle();
             }
 
             // set motor power to zero to turn off motors. The motors stop on their own but
@@ -295,11 +332,10 @@ public class Robot extends LinearOpMode
             rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (opModeIsActive() && rightMotor.isBusy())
+            while (rightMotor.isBusy())
             {
-                telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
-                telemetry.update();
-                idle();
+                //telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
+                //telemetry.update();
             }
 
             // set motor power to zero to turn off motors. The motors stop on their own but
@@ -344,6 +380,135 @@ public class Robot extends LinearOpMode
 
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+    //==========================================================================================
+    //skystoneNone method
+    public void skystoneNone()
+    {
+        telemetry.addData("skystoneNone", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        move(12, 1, true);
+
+
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(12, 1, false);
+
+        //move to the preplanned position
+        move(12, 1, true);
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+
+    public void skystoneLeft()
+    {
+        telemetry.addData("skystoneLeft", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        move(12, 1, true);
+
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(12, 1, false);
+
+        //move to the preplanned position
+        //-Already there
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+
+    public void skystoneRight()
+    {
+        telemetry.addData("skystoneRight", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        move(8, 1, true);
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(6, 1, false);
+
+        //move to the preplanned position
+        turn(90,1,false,false);
+
+        move(6, 1, true);
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+
+    public void skystoneReturn()
+    {
+        move(24, 1, true);
+
+
+
+        move(12, 1, true);
+    }
+    public void shuffle()
+    {
+        telemetry.addData("Shuffle Count", shuffleCount);
+        //Move Shuffle
+        if (shuffleCount == 0)
+            move(2, 0.1, true);
+        else if (shuffleCount == 1)
+            move(2, 0.1, true);
+        else if (shuffleCount == 2)
+            move(2, 0.1, true);
+        else if (shuffleCount == 3)
+            move(2, 0.1, false);
+        else if (shuffleCount == 4)
+            move(2, 0.1, false);
+        else if (shuffleCount == 5)
+            move(2, 0.1, false);
+
+        //Turn Shuffle
+        if (shuffleCount == 6)
+            turn(10, 0.1, true, false);
+        else if (shuffleCount == 8)
+            turn(10, 0.1, true, false);
+        else if (shuffleCount == 10)
+            turn(10, 0.1, true, true);
+        else if (shuffleCount == 12)
+            turn(10, 0.1, true, true);
+
+
+        telemetry.addData("Shuffle Count", shuffleCount);
+        telemetry.update();
+        shuffleCount++;
+    }
+
+    public void tensorFlowDrive()
+    {
+        if (skystonePosition == Position.none)
+        {
+            telemetry.addData("move to the skystone offscreen", "");
+            skystoneNone();
+        }
+        else if (skystonePosition == Position.left)
+        {
+            telemetry.addData("move to the left skystone position", "");
+            skystoneLeft();
+        }
+        else if (skystonePosition == Position.right)
+        {
+            telemetry.addData("move to the right skystone position", "");
+            skystoneRight();
+        }
+        else
+            telemetry.addData("Error: ", "No Move");
+        telemetry.update();
     }
 }
 
