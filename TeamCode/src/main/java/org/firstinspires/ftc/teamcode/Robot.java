@@ -82,14 +82,11 @@ public class Robot
 
     TensorFlow tensorFlow;
 
-    //==============================================================================================
-
-    //=========================================================================================
-    //Robot method
+    //==============================================================================================   Robot method
     public Robot(HardwareMap hardwareMap, OpMode opMode)
     {
-        //telemetry.addData("Robot", "setting up hardware");
-        //telemetry.update();
+        telemetry.addData("Robot", "setting up hardware");
+        telemetry.update();
 
         //arm = hardwareMap.servo.get("arm");
         this.hardwareMap = hardwareMap;
@@ -112,24 +109,25 @@ public class Robot
         gyro.calibrate();
 
         tensorFlow = new TensorFlow(hardwareMap, opMode);
+
+        telemetry.setAutoClear(false);
     }
-    //=========================================================================================
-    //Lift method
+    //==============================================================================================   Lift method
     public void setlift(double liftPower)
     {
-        //telemetry.addData("setLift", "running");
-        //telemetry.update();
+        telemetry.addData("setLift", "running");
+        telemetry.update();
 
         convertDistTicks(5.5, linearSpoolDistance);
     }
 
 
-    //==========================================================================================
+    //==============================================================================================   clapper
     //clapper method
     public void clapper(boolean clappersHome)
     {
-        //telemetry.addData("clappers", "running");
-        //telemetry.update();
+        telemetry.addData("clappers", "running");
+        telemetry.update();
 
         //set clappers position to their positions
         if(clappersHome)
@@ -145,14 +143,11 @@ public class Robot
         leftClapper.setPosition(leftClapperPosition);
         rightClapper.setPosition(rightClapperPosition);
     }
-
-
-    //==========================================================================================
-    //hook methd
+    //==============================================================================================   hooks
     public void hooks(boolean hooksHome)
     {
-        //telemetry.addData("hooks", "running");
-        //telemetry.update();
+        telemetry.addData("hooks", "running");
+        telemetry.update();
 
         //set hooks positions to positions
         if(hooksHome)
@@ -168,9 +163,7 @@ public class Robot
         leftHook.setPosition(leftHookPosition);
         rightHook.setPosition(rightHookPosition);
     }
-
-    //==============================================================================================
-
+    //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
     public int convertDistTicks(double distanceToTravel, double circumfrence)
     {
@@ -182,16 +175,22 @@ public class Robot
 
         return totalTicks;
     }
-
+    //==============================================================================================   move
     public void move(double distanceToTravel,double power, boolean isForward)
     {
-        //telemetry.addData("move", "running");
-        //telemetry.update();
+        telemetry.addData("move method", "running");
+        telemetry.update();
 
+        telemetry.addData("encoder", "starting");
+        telemetry.update();
         // reset encoder count kept by left motor.
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        telemetry.addData("encoder", "finished");
+        telemetry.update();
 
+        telemetry.addData("set direction", "starting");
+        telemetry.update();
         if (isForward)
         {
             rightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -202,6 +201,8 @@ public class Robot
             rightMotor.setDirection(DcMotor.Direction.FORWARD);
             leftMotor.setDirection(DcMotor.Direction.REVERSE);
         }
+        telemetry.addData("set direction", "fibnished");
+        telemetry.update();
 
         // set left motor to run to 5000 encoder counts.
         leftMotor.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
@@ -219,12 +220,14 @@ public class Robot
 
         while (leftMotor.isBusy())
         {
-            telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
+            telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
+                    + "  busy=" + leftMotor.isBusy());
             telemetry.update();
         }
         while (rightMotor.isBusy())
         {
-            telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
+            telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
+                    + "  busy=" + rightMotor.isBusy());
             telemetry.update();
         }
 
@@ -233,13 +236,11 @@ public class Robot
         leftMotor.setPower(0.0);
         rightMotor.setPower(0.0);
     }
-
-
-
+    //==============================================================================================   turnOnSpot
     public void turnOnSpot(double turningDegrees, double power, boolean turnLeft)
     {
-        //telemetry.addData("turnOnSpot", "running");
-        //telemetry.update();
+        telemetry.addData("turnOnSpot", "running");
+        telemetry.update();
 
         double turningNumber = (turningDegrees/180) * 16.4 * (Math.PI);
         double onSpotTurningNumber = turningNumber/2;
@@ -260,13 +261,11 @@ public class Robot
             leftMotor.setDirection(DcMotor.Direction.REVERSE);
         }
     }
-
-
-    //turning method
+    //==============================================================================================   turn
     public void turn(double turningDegrees, double power, boolean isForward, boolean leftWheel)
     {
-        //telemetry.addData("turn", "running");
-        //telemetry.update();
+        telemetry.addData("turn", "running");
+        telemetry.update();
 
         // calculations from degrees to motor distance
 
@@ -307,7 +306,8 @@ public class Robot
 
             // wait while opmode is active and left motor is busy running to position.
             while (leftMotor.isBusy()) {
-                telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
+                telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
+                        + "  busy=" + leftMotor.isBusy());
                 telemetry.update();
             }
 
@@ -334,8 +334,9 @@ public class Robot
             // wait while opmode is active and left motor is busy running to position.
             while (rightMotor.isBusy())
             {
-                //telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
-                //telemetry.update();
+                telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
+                        + "  busy=" + rightMotor.isBusy());
+                telemetry.update();
             }
 
             // set motor power to zero to turn off motors. The motors stop on their own but
@@ -344,7 +345,7 @@ public class Robot
             rightMotor.setPower(0.0);
         }
     }
-
+    //==============================================================================================   turnGyro
     public void turnGyro(double turningDegrees, double power, boolean turnRight)
     {
         telemetry.addData("turnGyro", "running");
@@ -381,8 +382,7 @@ public class Robot
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    //==========================================================================================
-    //skystoneNone method
+    //==============================================================================================   skystoneNone
     public void skystoneNone()
     {
         telemetry.addData("skystoneNone", "running");
@@ -404,7 +404,7 @@ public class Robot
         //Run method to return place skystone on foundation
         skystoneReturn();
     }
-
+    //==============================================================================================   skystoneLeft
     public void skystoneLeft()
     {
         telemetry.addData("skystoneLeft", "running");
@@ -425,7 +425,7 @@ public class Robot
         //Run method to return place skystone on foundation
         skystoneReturn();
     }
-
+    //==============================================================================================   skystoneRight
     public void skystoneRight()
     {
         telemetry.addData("skystoneRight", "running");
@@ -447,7 +447,7 @@ public class Robot
         //Run method to return place skystone on foundation
         skystoneReturn();
     }
-
+    //==============================================================================================   skystoneReturn
     public void skystoneReturn()
     {
         move(24, 1, true);
@@ -456,6 +456,7 @@ public class Robot
 
         move(12, 1, true);
     }
+    //==============================================================================================   shuffle
     public void shuffle()
     {
         telemetry.addData("Shuffle Count", shuffleCount);
@@ -488,7 +489,7 @@ public class Robot
         telemetry.update();
         shuffleCount++;
     }
-
+    //==============================================================================================   tensorFlowDrive
     public void tensorFlowDrive()
     {
         if (skystonePosition == Position.none)
