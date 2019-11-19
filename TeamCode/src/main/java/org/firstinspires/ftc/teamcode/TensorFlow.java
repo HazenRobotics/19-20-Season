@@ -67,31 +67,28 @@ public class TensorFlow
     OpMode opMode;
     Telemetry telemetry;
 
-    //==========================================================================================
-    //Robot method
+    //==============================================================================================   TensorFlow
+    //TensorFlow method
     public TensorFlow(HardwareMap hardwareMap, OpMode opMode)
     {
         needsShuffle = false;
 
         this.opMode = opMode;
         telemetry = opMode.telemetry;
+
+
+        telemetry.addData("TensorFlow", "setting up hardware");
+        telemetry.update();
     }
-
-
-
-    //==============================================================================================
-    //Tensor Flow
-
+    //==============================================================================================   tensorFlow
     public void tensorFlow()
     {
-
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
 
         //sleep(2000);
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector())
             initTfod();
-
         else
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
 
@@ -103,113 +100,123 @@ public class TensorFlow
             tfod.activate();
 
         //Wait for the game to begin
-        //telemetry.addData(">", "Press Play to start op mode");
-        //telemetry.update();
+        telemetry.addData(">", "Press Play to start op mode");
+        telemetry.update();
 
         while ((leftTally < IMAGE_CHECK_ITERATIONS && rightTally < IMAGE_CHECK_ITERATIONS && noneTally < IMAGE_CHECK_ITERATIONS) )
-    {
-        while (noneTally != IMAGE_CHECK_ITERATIONS && leftTally != IMAGE_CHECK_ITERATIONS && rightTally != IMAGE_CHECK_ITERATIONS)
         {
-            if (tfod != null)
+            while (noneTally != IMAGE_CHECK_ITERATIONS && leftTally != IMAGE_CHECK_ITERATIONS && rightTally != IMAGE_CHECK_ITERATIONS)
             {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                //sleep(1000);
-
-                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                List<Recognition> skystoneRecognitions = new ArrayList();
-                List<Recognition> stoneRecognitions = new ArrayList();
-
-
-                if (updatedRecognitions != null)
+                if (tfod != null)
                 {
-                    //telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    //sleep(1000);
+
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    List<Recognition> skystoneRecognitions = new ArrayList();
+                    List<Recognition> stoneRecognitions = new ArrayList();
 
 
-                    // step through the list of recognitions and display boundary info.
-                    int i = 0;
-                    for (Recognition recognition : updatedRecognitions)
+                    if (updatedRecognitions != null)
                     {
-                        if (updatedRecognitions.size() < 2)
-                            needsShuffle = true;
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
 
-                        //telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
-                        //telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f", recognition.getLeft(), recognition.getTop());
-                        //telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f", recognition.getRight(), recognition.getBottom());
 
-                        if (recognition.getLabel().equals("Skystone"))
+                        // step through the list of recognitions and display boundary info.
+                        int i = 0;
+                        for (Recognition recognition : updatedRecognitions)
                         {
-                            skystoneRecognitions.add(recognition);
-                            telemetry.addData("Skystone Recognitions", skystoneRecognitions.get(0));
-                        }
-                        else if (recognition.getLabel().equals("Stone"))
-                        {
-                            stoneRecognitions.add(recognition);
-                            telemetry.addData("Stone Recognitions", stoneRecognitions.get(0));
-                        }
-                    }
+                            needsShuffle = updatedRecognitions.size() < 2;
 
-                    if (updatedRecognitions.size() >= 2)
-                    {
-                        if (skystoneRecognitions.size() == 0)
-                        {
-                            noneTally += 1;
-                            totalTally += 1;
-                            telemetry.addData("None Tally: ", noneTally);
-                        }
-                        else if (skystoneRecognitions.get(0).getRight() < stoneRecognitions.get(0).getRight())
-                        {
-                            leftTally += 1;
-                            totalTally += 1;
-                            telemetry.addData("Left Tally: ", leftTally);
-                        }
-                        else if (skystoneRecognitions.get(0).getRight() > stoneRecognitions.get(0).getRight())
-                        {
-                            rightTally += 1;
-                            totalTally += 1;
-                            telemetry.addData("Right Tally: ", rightTally);
-                        }
-                        else
-                            telemetry.addData("Error: No Skystone Location Found", "");
-                    }
+                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f", recognition.getLeft(), recognition.getTop());
+                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f", recognition.getRight(), recognition.getBottom());
 
-                    telemetry.update();
+                            if (recognition.getLabel().equals("Skystone"))
+                            {
+                                skystoneRecognitions.add(recognition);
+                                telemetry.addData("Skystone Recognitions", skystoneRecognitions.get(0));
+                            }
+                            else if (recognition.getLabel().equals("Stone"))
+                            {
+                                stoneRecognitions.add(recognition);
+                                telemetry.addData("Stone Recognitions", stoneRecognitions.get(0));
+                            }
+                        }
 
-                    //if skystone is detected and left is less than right, position 1
-                    //esle if skystone is detected and right is greater than left, position 2
-                    //else (no skystone means position 3
+                        if (updatedRecognitions.size() >= 2)
+                        {
+                            if (skystoneRecognitions.size() == 0)
+                            {
+                                noneTally += 1;
+                                totalTally += 1;
+                                telemetry.addData("None Tally: ", noneTally);
+                            }
+                            else if (skystoneRecognitions.get(0).getRight() < stoneRecognitions.get(0).getRight())
+                            {
+                                leftTally += 1;
+                                totalTally += 1;
+                                telemetry.addData("Left Tally: ", leftTally);
+                            }
+                            else if (skystoneRecognitions.get(0).getRight() > stoneRecognitions.get(0).getRight())
+                            {
+                                rightTally += 1;
+                                totalTally += 1;
+                                telemetry.addData("Right Tally: ", rightTally);
+                            }
+                            else
+                                telemetry.addData("Error: No Skystone Location Found", "");
+                        }
 
-                    //In case we stop the program early, stop tfod
-                    if (!((LinearOpMode)opMode).opModeIsActive() && tfod != null)
-                    {
-                        tfod.shutdown();
+                        telemetry.update();
+
+                        //if skystone is detected and left is less than right, position 1
+                        //esle if skystone is detected and right is greater than left, position 2
+                        //else (no skystone means position 3
+
+                        //In case we stop the program early, stop tfod
+                        if (!((LinearOpMode)opMode).opModeIsActive() && tfod != null)
+                        {
+                            tfod.shutdown();
+                        }
                     }
                 }
             }
-        }
 
-        if (noneTally == IMAGE_CHECK_ITERATIONS)
-        {
-            skystonePosition = Position.none;
-            if (tfod != null) tfod.shutdown();
-            telemetry.addData("Skystone Position: ", "none");
+            if (noneTally == IMAGE_CHECK_ITERATIONS)
+            {
+                skystonePosition = Position.none;
+                if (tfod != null) tfod.shutdown();
+                telemetry.addData("Skystone Position: ", "none");
+            }
+            else if (leftTally == IMAGE_CHECK_ITERATIONS)
+            {
+                skystonePosition = Position.left;
+                if (tfod != null) tfod.shutdown();
+                telemetry.addData("Skystone Position: ", "left");
+            }
+            else if (rightTally == IMAGE_CHECK_ITERATIONS)
+            {
+                skystonePosition = Position.right;
+                if (tfod != null) tfod.shutdown();
+                telemetry.addData("Skystone Position: ", "right");
+            }
+            else
+                telemetry.addData("Error: ", "Tally Check Failed");
         }
-        else if (leftTally == IMAGE_CHECK_ITERATIONS)
-        {
-            skystonePosition = Position.left;
-            if (tfod != null) tfod.shutdown();
-            telemetry.addData("Skystone Position: ", "left");
-        }
-        else if (rightTally == IMAGE_CHECK_ITERATIONS)
-        {
-            skystonePosition = Position.right;
-            if (tfod != null) tfod.shutdown();
-            telemetry.addData("Skystone Position: ", "right");
-        }
-        else
-            telemetry.addData("Error: ", "Tally Check Failed");
     }
-}
+    //==============================================================================================   getSkystonePosition
+    public Position getSkystonePosition()
+    {
+        return skystonePosition;
+    }
+    //==============================================================================================   needsShuffle
+    public boolean needsShuffle()
+    {
+        return needsShuffle;
+    }
+    //==============================================================================================   initVuforia
     //Initialize the Vuforia localization engine.
     public void initVuforia()
     {
@@ -225,10 +232,10 @@ public class TensorFlow
 
         // Loading trackables is not necessary for the TensorFlow Object Detection engine.
 
-        //telemetry.addData("initVuforia: ", "We have vision");
-        //telemetry.update();
+        telemetry.addData("initVuforia: ", "We have vision");
+        telemetry.update();
     }
-
+    //==============================================================================================   initTfod
     //Initialize the TensorFlow Object Detection engine.
     public void initTfod()
     {
@@ -237,8 +244,9 @@ public class TensorFlow
         tfodParameters.minimumConfidence = 0.8;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
-        //telemetry.addData("initTfod: ", "We have vision");
-        //telemetry.update();
+
+        telemetry.addData("initTfod: ", "We have vision");
+        telemetry.update();
     }
 }
 

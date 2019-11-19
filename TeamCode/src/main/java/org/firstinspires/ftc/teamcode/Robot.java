@@ -58,7 +58,7 @@ public class Robot
 
     //======================================================
     final int tickPerRevlolution = 1440;
-    final double linearWheelDistance = (Math.PI) * 4;
+    final double linearWheelDistance = (Math.PI) * 4.314961;
     final double linearSpoolDistance = (Math.PI) * 1.5748;
 
 
@@ -78,25 +78,24 @@ public class Robot
 
     HardwareMap hardwareMap;
     OpMode opMode;
+    //LinearOpMode opMode;
     Telemetry telemetry;
 
     TensorFlow tensorFlow;
 
     //==============================================================================================   Robot method
-    public Robot(HardwareMap hardwareMap, OpMode opMode)
+    public Robot(HardwareMap hMap, OpMode opMode)
     {
-        telemetry.addData("Robot", "setting up hardware");
-        telemetry.update();
-
-        //arm = hardwareMap.servo.get("arm");
-        this.hardwareMap = hardwareMap;
+        hardwareMap = hMap;
         this.opMode = opMode;
+        //this.opMode = (LinearOpMode) opMode;
         telemetry = opMode.telemetry;
 
         //Map Hardware
         lift = hardwareMap.dcMotor.get("lift");
 
         rightMotor = hardwareMap.dcMotor.get("right_wheel");
+        leftMotor = hardwareMap.dcMotor.get("left_wheel");
 
         leftHook = hardwareMap.servo.get("left_hook");
         rightHook = hardwareMap.servo.get("right_hook");
@@ -110,7 +109,8 @@ public class Robot
 
         tensorFlow = new TensorFlow(hardwareMap, opMode);
 
-        telemetry.setAutoClear(false);
+        telemetry.addData("Robot", "finished setting up hardware");
+        telemetry.update();
     }
     //==============================================================================================   Lift method
     public void setlift(double liftPower)
@@ -120,10 +120,7 @@ public class Robot
 
         convertDistTicks(5.5, linearSpoolDistance);
     }
-
-
     //==============================================================================================   clapper
-    //clapper method
     public void clapper(boolean clappersHome)
     {
         telemetry.addData("clappers", "running");
@@ -181,16 +178,10 @@ public class Robot
         telemetry.addData("move method", "running");
         telemetry.update();
 
-        telemetry.addData("encoder", "starting");
-        telemetry.update();
         // reset encoder count kept by left motor.
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        telemetry.addData("encoder", "finished");
-        telemetry.update();
 
-        telemetry.addData("set direction", "starting");
-        telemetry.update();
         if (isForward)
         {
             rightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -201,13 +192,9 @@ public class Robot
             rightMotor.setDirection(DcMotor.Direction.FORWARD);
             leftMotor.setDirection(DcMotor.Direction.REVERSE);
         }
-        telemetry.addData("set direction", "fibnished");
-        telemetry.update();
-
         // set left motor to run to 5000 encoder counts.
         leftMotor.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
         rightMotor.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
-
         // set both motors to 25% power. Movement will start.
         leftMotor.setPower(power);
         rightMotor.setPower(power);
@@ -492,17 +479,20 @@ public class Robot
     //==============================================================================================   tensorFlowDrive
     public void tensorFlowDrive()
     {
-        if (skystonePosition == Position.none)
+        tensorFlow.tensorFlow();
+
+
+        if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)
         {
             telemetry.addData("move to the skystone offscreen", "");
             skystoneNone();
         }
-        else if (skystonePosition == Position.left)
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.left)
         {
             telemetry.addData("move to the left skystone position", "");
             skystoneLeft();
         }
-        else if (skystonePosition == Position.right)
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.right)
         {
             telemetry.addData("move to the right skystone position", "");
             skystoneRight();
@@ -510,6 +500,11 @@ public class Robot
         else
             telemetry.addData("Error: ", "No Move");
         telemetry.update();
+    }
+
+    public boolean needsShuffle()
+    {
+        return tensorFlow.needsShuffle();
     }
 }
 
