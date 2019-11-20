@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class RobotMecanum extends Robot
 {
 
-
+    //======================================================
     HardwareMap hardwareMap;
     OpMode opMode;
     //LinearOpMode opMode;
@@ -37,22 +37,11 @@ public class RobotMecanum extends Robot
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
-        hardwareMap = hMap;
-        this.opMode = opMode;
-        //this.opMode = (LinearOpMode) opMode;
-        telemetry = opMode.telemetry;
-
-        tensorFlow = new TensorFlow(hardwareMap, opMode);
-
-        tensorFlow.initVuforia();
-
-        telemetry.addData("Robot", "finished setting up hardware");
-        telemetry.update();
+        super(hMap, opMode);
     }
-
-    public boolean needsShuffle()
+    public void strafe()
     {
-        return tensorFlow.needsShuffle();
+
     }
 }
 
