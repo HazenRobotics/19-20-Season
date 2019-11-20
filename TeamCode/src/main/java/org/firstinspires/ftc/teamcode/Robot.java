@@ -61,7 +61,6 @@ public class Robot
     final double linearWheelDistance = (Math.PI) * 4.314961;
     final double linearSpoolDistance = (Math.PI) * 1.5748;
 
-
     //======================================================
     enum Position{none,left,right};
     Position skystonePosition;
@@ -74,7 +73,7 @@ public class Robot
     final int IMAGE_CHECK_ITERATIONS = 2;
 
     //======================================================
-    int shuffleCount = 0;
+    int shuffleCount = 1;
 
     HardwareMap hardwareMap;
     OpMode opMode;
@@ -108,6 +107,8 @@ public class Robot
         gyro.calibrate();
 
         tensorFlow = new TensorFlow(hardwareMap, opMode);
+
+        tensorFlow.initVuforia();
 
         telemetry.addData("Robot", "finished setting up hardware");
         telemetry.update();
@@ -204,7 +205,7 @@ public class Robot
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // wait while opmode is active and motors are busy running to position.
-
+/*
         while (leftMotor.isBusy())
         {
             telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
@@ -216,7 +217,7 @@ public class Robot
             telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
                     + "  busy=" + rightMotor.isBusy());
             telemetry.update();
-        }
+        }*/
 
         // set motor power to zero to turn off motors. The motors stop on their own but
         // power is still applied so we turn off the power.
@@ -268,7 +269,6 @@ public class Robot
         {
             rightMotor.setDirection(DcMotor.Direction.REVERSE);
             leftMotor.setDirection(DcMotor.Direction.FORWARD);
-
         }
         else
         {
@@ -292,11 +292,11 @@ public class Robot
             leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (leftMotor.isBusy()) {
+            /*while (leftMotor.isBusy()) {
                 telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
                         + "  busy=" + leftMotor.isBusy());
                 telemetry.update();
-            }
+            }*/
 
             // set motor power to zero to turn off motors. The motors stop on their own but
             // power is still applied so we turn off the power.
@@ -319,12 +319,12 @@ public class Robot
             rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (rightMotor.isBusy())
+            /*while (rightMotor.isBusy())
             {
                 telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
                         + "  busy=" + rightMotor.isBusy());
                 telemetry.update();
-            }
+            }*/
 
             // set motor power to zero to turn off motors. The motors stop on their own but
             // power is still applied so we turn off the power.
@@ -379,7 +379,6 @@ public class Robot
         //Dive and pick up skystone
         move(12, 1, true);
 
-
         clapper(false);
 
         //Back up with skystone and rotate
@@ -399,7 +398,13 @@ public class Robot
         //Position to pick up skystone
 
         //Dive and pick up skystone
-        move(12, 1, true);
+        turnOnSpot(90, 0.1, true);
+        move(8, 1, true);
+        turnOnSpot(90, 0.1, false);
+
+
+        move(10, 1, true);
+
 
         clapper(false);
 
@@ -407,7 +412,7 @@ public class Robot
         move(12, 1, false);
 
         //move to the preplanned position
-        //-Already there
+        turnOnSpot(90, 0.1, false);
 
         //Run method to return place skystone on foundation
         skystoneReturn();
@@ -420,7 +425,7 @@ public class Robot
         //Position to pick up skystone
 
         //Dive and pick up skystone
-        move(8, 1, true);
+        move(10, 1, true);
         clapper(false);
 
         //Back up with skystone and rotate
@@ -437,39 +442,44 @@ public class Robot
     //==============================================================================================   skystoneReturn
     public void skystoneReturn()
     {
-        move(24, 1, true);
-
-
-
-        move(12, 1, true);
+        move(36, 1, true);
     }
     //==============================================================================================   shuffle
     public void shuffle()
     {
-        telemetry.addData("Shuffle Count", shuffleCount);
         //Move Shuffle
-        if (shuffleCount == 0)
-            move(2, 0.1, true);
-        else if (shuffleCount == 1)
-            move(2, 0.1, true);
-        else if (shuffleCount == 2)
-            move(2, 0.1, true);
-        else if (shuffleCount == 3)
-            move(2, 0.1, false);
-        else if (shuffleCount == 4)
-            move(2, 0.1, false);
-        else if (shuffleCount == 5)
-            move(2, 0.1, false);
+        if (shuffleCount <= 3)
+        {
+            move(shuffleCount*2, 0.1, true);
+            move(shuffleCount*2, 0.1, false);
+        }
+        else if (shuffleCount <= 5)
+        {
+            move(shuffleCount, 0.1, false);
+            move(shuffleCount, 0.1, true);
+        }
 
         //Turn Shuffle
         if (shuffleCount == 6)
+        {
             turn(10, 0.1, true, false);
+            turn(10, 0.1, false, false);
+        }
         else if (shuffleCount == 8)
-            turn(10, 0.1, true, false);
+        {
+            turn(15, 0.1, true, false);
+            turn(15, 0.1, false, false);
+        }
         else if (shuffleCount == 10)
-            turn(10, 0.1, true, true);
+        {
+            turn(20, 0.1, true, true);
+            turn(20, 0.1, false, true);
+        }
         else if (shuffleCount == 12)
-            turn(10, 0.1, true, true);
+        {
+            turn(25, 0.1, true, true);
+            turn(25, 0.1, false, true);
+        }
 
 
         telemetry.addData("Shuffle Count", shuffleCount);
@@ -479,8 +489,11 @@ public class Robot
     //==============================================================================================   tensorFlowDrive
     public void tensorFlowDrive()
     {
-        tensorFlow.tensorFlow();
-
+        do
+        {
+            tensorFlow.tensorFlow();
+            shuffle();
+        }while(tensorFlow.needsShuffle);
 
         if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)
         {
