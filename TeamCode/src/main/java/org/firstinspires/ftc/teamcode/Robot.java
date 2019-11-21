@@ -113,13 +113,28 @@ public class Robot
         telemetry.addData("Robot", "finished setting up hardware");
         telemetry.update();
     }
-    //==============================================================================================   Lift method
-    public void setlift(double liftPower)
+    //==============================================================================================   Lift
+    public void setlift(double liftPosition, double liftPower)
     {
         telemetry.addData("setLift", "running");
         telemetry.update();
 
-        convertDistTicks(5.5, linearSpoolDistance);
+        /*if (gamepad2.left_stick_y > 0)
+        {
+            lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED * 0.4);
+            telemetry.addData("Lift", "down");
+        }
+        else if (gamepad2.left_stick_y < 0)
+        {
+            lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
+            telemetry.addData("Lift", "up");
+        }
+        else
+        {
+            lift.setPower(0);
+        }*/
+        //convertDistTicks(5.5, linearSpoolDistance)
+        lift.setPower(liftPower);
     }
     //==============================================================================================   clapper
     public void clapper(boolean clappersHome)

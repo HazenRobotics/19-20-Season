@@ -25,8 +25,18 @@ import java.util.ArrayList;
 
 public class RobotMecanum extends Robot
 {
+    //Define Wheel Motors
+    DcMotor frontLeftWheel;
+    DcMotor backLeftWheel;
+    DcMotor frontRightWheel;
+    DcMotor backRightWheel;
 
-    //======================================================
+    Servo claw;
+    final double CLAW_HOME = 0.0;
+    final double CLAW_EXTENDED = 0.38;
+    double clawPosition = CLAW_HOME;
+
+    //=======================================================
     HardwareMap hardwareMap;
     OpMode opMode;
     //LinearOpMode opMode;
@@ -38,10 +48,61 @@ public class RobotMecanum extends Robot
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
         super(hMap, opMode);
+
+        //Claw
+        claw = hardwareMap.servo.get("claw");
+        claw.setPosition(CLAW_HOME);
     }
-    public void strafe()
+    public void moveOmni(double left_stick_x, double left_stick_y, double right_stick_x)
+    {
+        double drive = Math.signum(-left_stick_y) * Math.pow(left_stick_y, 2);
+        double strafe = Math.signum(left_stick_x) * Math.pow(left_stick_x, 2);
+        double rotate = right_stick_x;
+
+        double frontLeftPower = drive + strafe + rotate;
+        double backLeftPower = -drive - strafe + rotate;
+        double frontRightPower = drive - strafe - rotate;
+        double backRightPower = -drive + strafe - rotate;
+
+        //Set the wheel power according to variables
+        frontLeftWheel.setPower(frontLeftPower);
+        backLeftWheel.setPower(backLeftPower);
+        frontRightWheel.setPower(frontRightPower);
+        backRightWheel.setPower(backRightPower);
+
+        //Print Telementary Data for the wheels
+        telemetry.addData("frontLeftPower", frontLeftPower);
+        telemetry.addData("backLeftPower", backLeftPower);
+        telemetry.addData("frontRightPower", frontRightPower);
+        telemetry.addData("backRightPower", backRightPower);
+    }
+    public void moveHorizontal()
     {
 
     }
+    public void moveVertical()
+    {
+
+    }
+    public void rotate()
+    {
+
+    }
+    public void claw(boolean clawHome)
+    {
+        if (clawHome)
+        {
+            clawPosition = CLAW_HOME;
+        }
+        else
+        {
+            clawPosition = CLAW_EXTENDED;
+        }
+
+        claw.setPosition(clawPosition);
+
+        telemetry.addData("Right Hook Position: ", rightHook.getPosition());
+    }
+
 }
 

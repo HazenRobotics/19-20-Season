@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="TeleOpMecanum")
 public class TeleopMecanum extends OpMode
 {
+    RobotMecanum robotMecanum ;
+    /*
     //Define Wheel Motors
     DcMotor frontLeftWheel;
     DcMotor backLeftWheel;
@@ -45,11 +47,14 @@ public class TeleopMecanum extends OpMode
     final double CLAW_HOME = 0.0;
     final double CLAW_EXTENDED = 0.38;
     double clawPosition = CLAW_HOME;
+    */
 
     //Runs once on init
     @Override
     public void init()
     {
+        robotMecanum = new RobotMecanum(hardwareMap, this);
+        /*
         //Get hardware map definitions for the
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
@@ -72,6 +77,8 @@ public class TeleopMecanum extends OpMode
         //Claw
         claw = hardwareMap.servo.get("claw");
         claw.setPosition(CLAW_HOME);
+
+         */
     }
 
     //Continues to loop
@@ -92,18 +99,20 @@ public class TeleopMecanum extends OpMode
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Claw
-        if (gamepad2.y)
+
+
+        /*
+        if(gamepad2.y)
         {
-            clawPosition = CLAW_HOME;
+            robotMecanum.claw(true);
         }
-        else if (gamepad2.x)
+        if(gamepad2.x)
         {
-            clawPosition = CLAW_EXTENDED;
+            robotMecanum.claw(false);
         }
 
-        claw.setPosition(clawPosition);
 
-        telemetry.addData("Right Hook Position: ", rightHook.getPosition());
+
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Lift
         if (gamepad2.left_stick_y > 0)
@@ -119,7 +128,7 @@ public class TeleopMecanum extends OpMode
         else
         {
             lift.setPower(0);
-        }
+        }*/
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Servo Hooks
@@ -143,6 +152,7 @@ public class TeleopMecanum extends OpMode
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //driving
+        /*
         //Convert gamepad data into custom variables
         drive = Math.signum(-gamepad1.left_stick_y) * Math.pow(gamepad1.left_stick_y, 2);
         strafe = Math.signum(gamepad1.left_stick_x) * Math.pow(gamepad1.left_stick_x, 2);
@@ -159,12 +169,11 @@ public class TeleopMecanum extends OpMode
         backLeftWheel.setPower(backLeftPower);
         frontRightWheel.setPower(frontRightPower);
         backRightWheel.setPower(backRightPower);
+        */
 
-        //Print Telementary Data for the wheels
-        telemetry.addData("frontLeftPower", frontLeftPower);
-        telemetry.addData("backLeftPower", backLeftPower);
-        telemetry.addData("frontRightPower", frontRightPower);
-        telemetry.addData("backRightPower", backRightPower);
+
+        robotMecanum.moveOmni(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
