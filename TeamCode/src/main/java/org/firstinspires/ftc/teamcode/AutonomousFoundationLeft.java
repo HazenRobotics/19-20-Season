@@ -111,7 +111,6 @@ public class AutonomousFoundationLeft extends LinearOpMode
     public void runOpMode() throws InterruptedException
     {
         Robot robot = new Robot(hardwareMap, this);
-        TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
         //arm = hardwareMap.servo.get("arm");
 

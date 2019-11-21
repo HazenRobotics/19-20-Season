@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="TeleOpMecanum")
 public class TeleopMecanum extends OpMode
 {
-    RobotMecanum robotMecanum ;
+
     /*
     //Define Wheel Motors
     DcMotor frontLeftWheel;
@@ -48,37 +48,15 @@ public class TeleopMecanum extends OpMode
     final double CLAW_EXTENDED = 0.38;
     double clawPosition = CLAW_HOME;
     */
+    RobotMecanum robotMecanum;
 
     //Runs once on init
     @Override
     public void init()
     {
+
         robotMecanum = new RobotMecanum(hardwareMap, this);
-        /*
-        //Get hardware map definitions for the
-        frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
-        backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
-        frontRightWheel = hardwareMap.dcMotor.get("front_right_wheel");
-        backRightWheel = hardwareMap.dcMotor.get("back_right_wheel");
 
-        //Reverse the two flipped wheels
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
-
-        //Lift
-        lift = hardwareMap.dcMotor.get("lift");
-
-        //Hook
-        leftHook = hardwareMap.servo.get("left_hook");
-        rightHook = hardwareMap.servo.get("right_hook");
-        leftHook.setPosition(LEFT_HOOK_HOME);
-        rightHook.setPosition(RIGHT_HOOK_HOME);
-
-        //Claw
-        claw = hardwareMap.servo.get("claw");
-        claw.setPosition(CLAW_HOME);
-
-         */
     }
 
     //Continues to loop
@@ -90,7 +68,7 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("??-Steering-??", "??-Gp1: right stick y (axis)-??");
         telemetry.addData("Claw", "Gp2: b = home");
         telemetry.addData("Claw", "Gp2: x = extended");
-        telemetry.addData("Lift", "Gp2: left stick y (axis)");
+        //telemetry.addData("Lift", "Gp2: left stick y (axis)");
         //telemetry.addData("Hooks", "Gp2: y = home");
         //telemetry.addData("Hooks", "Gp2: a = extended");
         telemetry.addData("", "");
@@ -101,7 +79,7 @@ public class TeleopMecanum extends OpMode
         //Claw
 
 
-        /*
+
         if(gamepad2.y)
         {
             robotMecanum.claw(true);
@@ -111,7 +89,7 @@ public class TeleopMecanum extends OpMode
             robotMecanum.claw(false);
         }
 
-
+/*
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Lift
@@ -132,15 +110,14 @@ public class TeleopMecanum extends OpMode
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Servo Hooks
+
         /*if (gamepad2.y)
         {
-            leftHookPosition = LEFT_HOOK_HOME;
-            rightHookPosition = RIGHT_HOOK_HOME;
+            robotMecanum.hooks(true);
         }
         else if (gamepad2.a)
         {
-            leftHookPosition = LEFT_HOOK_EXTENDED;
-            rightHookPosition = RIGHT_HOOK_EXTENDED;
+            robotMecanum.hooks(false);
         }
 
         leftHook.setPosition(leftHookPosition);
@@ -148,6 +125,18 @@ public class TeleopMecanum extends OpMode
 
         telemetry.addData("Left Hook Position: ", leftHook.getPosition());
         telemetry.addData("Right Hook Position: ", rightHook.getPosition());
+
+
+
+        if (gamepad2.y)
+        {
+            robotMecanum.hooks()
+        }
+        else if (gamepad2.a)
+        {
+            leftHookPosition = LEFT_HOOK_EXTENDED;
+            rightHookPosition = RIGHT_HOOK_EXTENDED;
+        }
          */
 
         //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -158,17 +147,6 @@ public class TeleopMecanum extends OpMode
         strafe = Math.signum(gamepad1.left_stick_x) * Math.pow(gamepad1.left_stick_x, 2);
         rotate = gamepad1.right_stick_x;
 
-        //Set wheel power according to input
-        frontLeftPower = drive + strafe + rotate;
-        backLeftPower = -drive - strafe + rotate;
-        frontRightPower = drive - strafe - rotate;
-        backRightPower = -drive + strafe - rotate;
-
-        //Set the wheel power according to variables
-        frontLeftWheel.setPower(frontLeftPower);
-        backLeftWheel.setPower(backLeftPower);
-        frontRightWheel.setPower(frontRightPower);
-        backRightWheel.setPower(backRightPower);
         */
 
 

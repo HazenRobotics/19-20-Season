@@ -114,6 +114,11 @@ public class Robot
         telemetry.update();
     }
     //==============================================================================================   Lift
+    public void hardwareChoose(double hi)
+    {
+
+    }
+    //==============================================================================================   Lift
     public void setlift(double liftPosition, double liftPower)
     {
         telemetry.addData("setLift", "running");

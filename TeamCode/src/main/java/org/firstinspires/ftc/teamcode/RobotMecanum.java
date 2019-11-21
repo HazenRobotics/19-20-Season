@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.util.ArrayList;
 
-public class RobotMecanum extends Robot
+public class RobotMecanum// extends Robot
 {
     //Define Wheel Motors
     DcMotor frontLeftWheel;
@@ -37,8 +37,8 @@ public class RobotMecanum extends Robot
     double clawPosition = CLAW_HOME;
 
     //=======================================================
-    HardwareMap hardwareMap;
     OpMode opMode;
+    HardwareMap hardwareMap;
     //LinearOpMode opMode;
     Telemetry telemetry;
 
@@ -47,11 +47,27 @@ public class RobotMecanum extends Robot
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
-        super(hMap, opMode);
+
+        hardwareMap = hMap;
+        this.opMode = opMode;
+        //this.opMode = (LinearOpMode) opMode;
+        telemetry = opMode.telemetry;
+
+        //super(hMap, opMode);
+
+        frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
+        backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
+        frontRightWheel = hardwareMap.dcMotor.get("front_right_wheel");
+        backRightWheel = hardwareMap.dcMotor.get("back_right_wheel");
+
+        //Reverse the two flipped wheels
+        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
 
         //Claw
         claw = hardwareMap.servo.get("claw");
         claw.setPosition(CLAW_HOME);
+
     }
     public void moveOmni(double left_stick_x, double left_stick_y, double right_stick_x)
     {
@@ -63,6 +79,11 @@ public class RobotMecanum extends Robot
         double backLeftPower = -drive - strafe + rotate;
         double frontRightPower = drive - strafe - rotate;
         double backRightPower = -drive + strafe - rotate;
+
+        //frontLeftPower = drive + strafe + rotate;
+        //backLeftPower = -drive - strafe + rotate;
+        //frontRightPower = drive - strafe - rotate;
+        //backRightPower = -drive + strafe - rotate;
 
         //Set the wheel power according to variables
         frontLeftWheel.setPower(frontLeftPower);
@@ -76,17 +97,17 @@ public class RobotMecanum extends Robot
         telemetry.addData("frontRightPower", frontRightPower);
         telemetry.addData("backRightPower", backRightPower);
     }
-    public void moveHorizontal()
-    {
-
-    }
     public void moveVertical()
     {
-
+        moveOmni( 1, 1, 1);
+    }
+    public void moveHorizontal()
+    {
+        moveOmni( 1, 1, 1);
     }
     public void rotate()
     {
-
+        moveOmni( 1, 1, 1);
     }
     public void claw(boolean clawHome)
     {
@@ -101,7 +122,7 @@ public class RobotMecanum extends Robot
 
         claw.setPosition(clawPosition);
 
-        telemetry.addData("Right Hook Position: ", rightHook.getPosition());
+        telemetry.addData("Claw Position: ", claw.getPosition());
     }
 
 }
