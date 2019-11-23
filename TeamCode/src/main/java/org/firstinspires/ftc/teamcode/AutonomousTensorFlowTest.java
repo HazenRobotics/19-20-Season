@@ -35,9 +35,12 @@ public class AutonomousTensorFlowTest extends LinearOpMode
         //Pre init
 
         Robot robot = new Robot(hardwareMap, this);
+        TensorFlow tensorFlow = new TensorFlow(hardwareMap, this);
 
         telemetry.addData("init", "finished");
         telemetry.update();
+
+        tensorFlow.initVuforia();
 
         waitForStart();
 

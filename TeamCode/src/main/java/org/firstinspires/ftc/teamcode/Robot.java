@@ -58,7 +58,7 @@ public class Robot
 
     //======================================================
     final int tickPerRevlolution = 1440;
-    final double linearWheelDistance = (Math.PI) * 4.314961;
+    final double linearWheelDistance = (Math.PI) * 4;//.314961;
     final double linearSpoolDistance = (Math.PI) * 1.5748;
 
     //======================================================
@@ -113,15 +113,15 @@ public class Robot
         telemetry.addData("Robot", "finished setting up hardware");
         telemetry.update();
     }
-    //==============================================================================================   Lift
+    //==============================================================================================   hardwareChoose
     public void hardwareChoose(double hi)
     {
 
     }
     //==============================================================================================   Lift
-    public void setlift(double liftPosition, double liftPower)
+    public void lift(double distance,double liftPower, boolean isRight)
     {
-        telemetry.addData("setLift", "running");
+        telemetry.addData("lift", "running");
         telemetry.update();
 
         /*if (gamepad2.left_stick_y > 0)
@@ -138,8 +138,36 @@ public class Robot
         {
             lift.setPower(0);
         }*/
-        //convertDistTicks(5.5, linearSpoolDistance)
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        if (isRight)
+        {
+            lift.setDirection(DcMotor.Direction.FORWARD);
+        }
+        else
+        {
+            lift.setDirection(DcMotor.Direction.REVERSE);
+        }
+        // set left motor to run to 5000 encoder counts.
+        lift.setTargetPosition(convertDistTicks(5.5, linearSpoolDistance));
+
+        // set both motors to 25% power. Movement will start.
         lift.setPower(liftPower);
+
+        // set left motor to run to target encoder position and stop with brakes on.
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (lift.isBusy())
+        {
+            telemetry.addData("encoder-fwd", lift.getCurrentPosition()
+                    + "  busy=" + lift.isBusy());
+            telemetry.update();
+        }
+
+        // set motor power to zero to turn off motors. The motors stop on their own but
+        // power is still applied so we turn off the power.
+        lift.setPower(0.0);
     }
     //==============================================================================================   clapper
     public void clapper(boolean clappersHome)
@@ -225,7 +253,7 @@ public class Robot
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // wait while opmode is active and motors are busy running to position.
-/*
+
         while (leftMotor.isBusy())
         {
             telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
@@ -237,7 +265,7 @@ public class Robot
             telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
                     + "  busy=" + rightMotor.isBusy());
             telemetry.update();
-        }*/
+        }
 
         // set motor power to zero to turn off motors. The motors stop on their own but
         // power is still applied so we turn off the power.

@@ -11,43 +11,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class TeleopMecanum extends OpMode
 {
 
-    /*
-    //Define Wheel Motors
-    DcMotor frontLeftWheel;
-    DcMotor backLeftWheel;
-    DcMotor frontRightWheel;
-    DcMotor backRightWheel;
 
-    //Variables to store wheel power
-    double frontLeftPower;
-    double backLeftPower;
-    double frontRightPower;
-    double backRightPower;
-
-    //Variables for Mecanum input
-    double drive;
-    double strafe;
-    double rotate;
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
-
-    //Hooks
-    Servo leftHook;
-    Servo rightHook;
-    final double LEFT_HOOK_HOME = 0.6;
-    final double RIGHT_HOOK_HOME = 0.2;
-    final double LEFT_HOOK_EXTENDED = 0.075;
-    final double RIGHT_HOOK_EXTENDED = 0.9;
-    double leftHookPosition = LEFT_HOOK_HOME;
-    double rightHookPosition =  RIGHT_HOOK_HOME;
 
     //Claw
     Servo claw;
     final double CLAW_HOME = 0.0;
     final double CLAW_EXTENDED = 0.38;
     double clawPosition = CLAW_HOME;
-    */
+
     RobotMecanum robotMecanum;
 
     //Runs once on init
@@ -64,23 +38,17 @@ public class TeleopMecanum extends OpMode
     public void loop()
     {
         telemetry.addData("           Controls", "   ");
-        telemetry.addData("??-Steering-??", "??-Gp1: left stick y (axis)-??");
-        telemetry.addData("??-Steering-??", "??-Gp1: right stick y (axis)-??");
+        telemetry.addData("Steering", "Gp1: left stick y (axis) = drive");
+        telemetry.addData("Steering", "Gp1: left stick x (axis) = strafe");
+        telemetry.addData("Steering", "Gp1: right stick x (axis) = rotate");
         telemetry.addData("Claw", "Gp2: b = home");
         telemetry.addData("Claw", "Gp2: x = extended");
-        //telemetry.addData("Lift", "Gp2: left stick y (axis)");
-        //telemetry.addData("Hooks", "Gp2: y = home");
-        //telemetry.addData("Hooks", "Gp2: a = extended");
-        telemetry.addData("", "");
+        telemetry.addData("Lift", "Gp2: left stick y (axis)");
+        telemetry.addData("Hooks", "Gp2: y = home");
+        telemetry.addData("Hooks", "Gp2: a = extended    \n");
 
-
-
-        //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         //Claw
-
-
-
-        if(gamepad2.y)
+        if(gamepad2.b)
         {
             robotMecanum.claw(true);
         }
@@ -89,9 +57,20 @@ public class TeleopMecanum extends OpMode
             robotMecanum.claw(false);
         }
 
-/*
+        //Servo Hooks
+        if (gamepad2.y)
+        {
+            robotMecanum.hooks(true);
+        }
+        else if (gamepad2.a)
+        {
+            robotMecanum.hooks(false);
+        }
 
-        //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        //Driving
+        robotMecanum.moveOmni(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+
+        /*
         //Lift
         if (gamepad2.left_stick_y > 0)
         {
@@ -106,53 +85,9 @@ public class TeleopMecanum extends OpMode
         else
         {
             lift.setPower(0);
-        }*/
-
-        //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-        //Servo Hooks
-
-        /*if (gamepad2.y)
-        {
-            robotMecanum.hooks(true);
-        }
-        else if (gamepad2.a)
-        {
-            robotMecanum.hooks(false);
         }
 
-        leftHook.setPosition(leftHookPosition);
-        rightHook.setPosition(rightHookPosition);
-
-        telemetry.addData("Left Hook Position: ", leftHook.getPosition());
-        telemetry.addData("Right Hook Position: ", rightHook.getPosition());
-
-
-
-        if (gamepad2.y)
-        {
-            robotMecanum.hooks()
-        }
-        else if (gamepad2.a)
-        {
-            leftHookPosition = LEFT_HOOK_EXTENDED;
-            rightHookPosition = RIGHT_HOOK_EXTENDED;
-        }
          */
-
-        //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-        //driving
-        /*
-        //Convert gamepad data into custom variables
-        drive = Math.signum(-gamepad1.left_stick_y) * Math.pow(gamepad1.left_stick_y, 2);
-        strafe = Math.signum(gamepad1.left_stick_x) * Math.pow(gamepad1.left_stick_x, 2);
-        rotate = gamepad1.right_stick_x;
-
-        */
-
-
-        robotMecanum.moveOmni(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
-
-        //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
         telemetry.update();

@@ -26,8 +26,6 @@ import java.util.ArrayList;
 //@disabled
 public class AutonomousTest extends LinearOpMode
 {
-    Robot robot = new Robot(hardwareMap, this);
-    TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
     //======================================================
     DcMotor leftMotor;
@@ -110,41 +108,37 @@ public class AutonomousTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
+        RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this);
+        TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
-        //arm = hardwareMap.servo.get("arm");
-
-        //Map Hardware
-        lift = hardwareMap.dcMotor.get("lift");
-
-        leftMotor = hardwareMap.dcMotor.get("left_wheel");
-        rightMotor = hardwareMap.dcMotor.get("right_wheel");
-
-        leftHook = hardwareMap.servo.get("left_hook");
-        rightHook = hardwareMap.servo.get("right_hook");
-
-        leftClapper = hardwareMap.servo.get("left_clapper");
-        rightClapper = hardwareMap.servo.get("right_clapper");
-
-        gyro = hardwareMap.gyroSensor.get("gyro");
-
-        gyro.calibrate();
+        //gyro.calibrate();
 
         //==========================================================================================
         //Pre init
 
-        tensorflow.initVuforia();
+        //tensorflow.initVuforia();
 
-        waitForStart();
-
-        robot.hooks(true);
-        robot.clapper(true);
+        //robotMecanum.hooks(true);
+        //robotMecanum.clapper(true);
         sleep(500);
 
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
 
+        waitForStart();
+
+
+
         //==========================================================================================
         //Official Start
+        double ticks = robotMecanum.convertDistTicks(4, robotMecanum.linearWheelDistance);
+        double power = 0.75;
+        robotMecanum.moveOmni(ticks * power,1,1);
+        robotMecanum.convertDistTicks(4, robotMecanum.linearWheelDistance);
+
+        robotMecanum.moveVertical(robotMecanum.convertDistTicks(40, robotMecanum.linearWheelDistance), 100);
+
+        /*
         robot.move(30, 1, false);
         sleep(250);
 
@@ -206,6 +200,7 @@ public class AutonomousTest extends LinearOpMode
         sleep(250);
 
         robot.tensorFlowDrive();
+        */
 
 
 
