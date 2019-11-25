@@ -46,6 +46,7 @@ public class AutonomousTensorFlowTest extends LinearOpMode
 
         robot.hooks(true);
         robot.clapper(true);
+        telemetry.addData("hooks and clapper", "home");
         sleep(100);
 
         //==========================================================================================
@@ -57,8 +58,10 @@ public class AutonomousTensorFlowTest extends LinearOpMode
         */
 
 
-        //robot.move(18, 1, true);
-        //sleep(250);
+        robot.move(18, 1.0, true);
+        telemetry.addData("moved", "forward");
+        telemetry.update();
+        sleep(5000);
         //robot.turnOnSpot(45,0.75, false);
 
         robot.tensorFlowDrive();
