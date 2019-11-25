@@ -1,32 +1,19 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.app.SharedElementCallback;
-
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.android.AndroidGyroscope;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import java.util.List;
-import java.util.ArrayList;
 
 public class RobotMecanum// extends Robot
 {
-    final int tickPerRevlolution = 1440;
-    final double linearWheelDistance = 4;
+    final int TICK_PER_REVOLUTION = 1440;
+    final double WHEEL_DIAMETER = 4;
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
@@ -39,8 +26,8 @@ public class RobotMecanum// extends Robot
 
     Servo leftHook;
     Servo rightHook;
-    final double LEFT_HOOK_HOME = 0.75;
-    final double RIGHT_HOOK_HOME = 0.2;
+    final double LEFT_HOOK_HOME = 0.5;
+    final double RIGHT_HOOK_HOME = 0.5;
     final double LEFT_HOOK_EXTENDED = 0;
     final double RIGHT_HOOK_EXTENDED = 1;
     double leftHookPosition = LEFT_HOOK_HOME;
@@ -51,6 +38,8 @@ public class RobotMecanum// extends Robot
     final double CLAW_HOME = 0.0;
     final double CLAW_EXTENDED = 0.38;
     double clawPosition = CLAW_HOME;
+
+    GyroSensor gyro;
 
     //=======================================================
     OpMode opMode;
@@ -89,6 +78,7 @@ public class RobotMecanum// extends Robot
         claw = hardwareMap.servo.get("claw");
         claw.setPosition(CLAW_HOME);
 
+        gyro = hardwareMap.gyroSensor.get("gyro");
     }
     //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
@@ -98,7 +88,7 @@ public class RobotMecanum// extends Robot
         //1 rotation = 4
 
         double revolutions = distanceToTravel / circumfrence;
-        int totalTicks = (int) Math.round(revolutions * tickPerRevlolution);
+        int totalTicks = (int) Math.round(revolutions * TICK_PER_REVOLUTION);
 
         return totalTicks;
     }
@@ -130,13 +120,17 @@ public class RobotMecanum// extends Robot
         telemetry.addData("frontRightPower", frontRightPower);
         telemetry.addData("backRightPower", backRightPower);
     }
-    public void moveVertical(double distance, double power)
+    public void drive (double distance, double power)
     {
         moveOmni( 1, 1, 1);
     }
-    public void moveHorizontal()
+    public void strafe(double distance, double power)
     {
-        moveOmni( 1, 1, 1);
+        frontLeftWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
+        backLeftWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
+        frontRightWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
+        backRightWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
+        moveOmni( 0, power, 0);
     }
     public void rotate()
     {

@@ -88,6 +88,7 @@ public class TeleopMecanum extends OpMode
         }
 
          */
+        robotMecanum.lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
 
 
         telemetry.update();
