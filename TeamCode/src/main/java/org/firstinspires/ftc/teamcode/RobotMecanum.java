@@ -44,7 +44,6 @@ public class RobotMecanum extends Robot
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
 
-
     Servo claw;
     final double CLAW_HOME = 0.0;
     final double CLAW_EXTENDED = 0.38;
@@ -53,10 +52,7 @@ public class RobotMecanum extends Robot
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
-
         super(hMap, opMode);
-
-        //super(hMap, opMode);
 
         lift = hardwareMap.dcMotor.get("lift");
 
