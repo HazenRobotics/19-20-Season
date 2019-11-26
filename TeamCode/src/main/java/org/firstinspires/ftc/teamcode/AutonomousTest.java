@@ -46,12 +46,8 @@ public class AutonomousTest extends LinearOpMode
 
         //==========================================================================================
         //Official Start
-        /*double ticks = robotMecanum.convertDistTicks(4, robotMecanum.WHEEL_DIAMETER);
-        double power = 0.75;
-        robotMecanum.moveOmni(ticks * power,1,1);*/
-        robotMecanum.convertDistTicks(4, robotMecanum.WHEEL_DIAMETER);
 
-        robotMecanum.strafe(10, 100);
+        robotMecanum.drive(10, 100);
 
         /*
         robot.move(30, 1, false);
