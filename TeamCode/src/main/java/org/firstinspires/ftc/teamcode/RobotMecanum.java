@@ -126,10 +126,10 @@ public class RobotMecanum// extends Robot
     }
     public void strafe(double distance, double power)
     {
-        frontLeftWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
-        backLeftWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
-        frontRightWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
-        backRightWheel.setTargetPosition(convertDistTicks(distance/3*Math.sqrt(2), WHEEL_DIAMETER * Math.PI));
+        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         moveOmni( 0, power, 0);
     }
     public void rotate()
