@@ -123,7 +123,11 @@ public class RobotMecanum// extends Robot
     }
     public void drive (double distance, double power)
     {
-        moveOmni( 1, 1, 1);
+        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        moveOmni( power, 0, 0);
     }
     public void strafe(double distance, double power)
     {
@@ -133,9 +137,13 @@ public class RobotMecanum// extends Robot
         backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         moveOmni( 0, power, 0);
     }
-    public void rotate()
+    public void rotate(double distance, double power)
     {
-        moveOmni( 1, 1, 1);
+        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        moveOmni( 0, 0, power);
     }
     public void claw(boolean clawHome)
     {
