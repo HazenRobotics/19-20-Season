@@ -79,6 +79,7 @@ public class RobotMecanum// extends Robot
         claw.setPosition(CLAW_HOME);
 
         gyro = hardwareMap.gyroSensor.get("gyro");
+        gyro.calibrate();
     }
     //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
@@ -175,6 +176,43 @@ public class RobotMecanum// extends Robot
         telemetry.addData("Right Hook Position: ", rightHook.getPosition());
         telemetry.update();
     }
+    //==============================================================================================   turnGyro
+    //not ready or programmed yet
+    public void turnGyro(double turningDegrees, double power, boolean turnRight)
+    {
+        telemetry.addData("turnGyro", "running");
+        telemetry.update();
 
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        gyro.resetZAxisIntegrator();
+        if(turnRight)
+        {
+            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
+            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
+
+            backRightWheel.setPower(power);
+            backLeftWheel.setPower(power);
+
+            while(gyro.getHeading() + 180 < 180 - turningDegrees) {}
+        }
+        else
+        {
+            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+
+            backRightWheel.setPower(power);
+            backLeftWheel.setPower(power);
+
+            while(gyro.getHeading() + 180 < 180 + turningDegrees) {}
+        }
+
+        backRightWheel.setPower(0);
+        backLeftWheel.setPower(0);
+
+        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
 }
 
