@@ -65,14 +65,6 @@ public class Robot
 
     //======================================================
     enum Position{none,left,right};
-    Position skystonePosition;
-
-    int noneTally;
-    int leftTally;
-    int rightTally;
-    int totalTally;
-
-    final int IMAGE_CHECK_ITERATIONS = 2;
 
     //======================================================
     int shuffleCount = 1;

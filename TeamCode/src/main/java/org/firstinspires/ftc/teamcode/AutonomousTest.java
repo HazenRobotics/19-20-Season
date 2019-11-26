@@ -27,15 +27,15 @@ public class AutonomousTest extends LinearOpMode
 
         tensorflow.initVuforia();
 
-        //gyro.calibrate();
+        robotMecanum.gyro.calibrate();
 
         //==========================================================================================
         //Pre init
 
-        //tensorflow.initVuforia();
+        tensorflow.initVuforia();
 
-        //robotMecanum.hooks(true);
-        //robotMecanum.clapper(true);
+        robotMecanum.hooks(true);
+        robotMecanum.claw(true);
 
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
