@@ -1,14 +1,19 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.SerialNumber;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class RobotMecanum// extends Robot
 {
@@ -28,8 +33,8 @@ public class RobotMecanum// extends Robot
     Servo rightHook;
     final double LEFT_HOOK_HOME = 0.5;
     final double RIGHT_HOOK_HOME = 0.5;
-    final double LEFT_HOOK_EXTENDED = 0;
-    final double RIGHT_HOOK_EXTENDED = 1;
+    final double LEFT_HOOK_EXTENDED = 0.0;
+    final double RIGHT_HOOK_EXTENDED = 1.0;
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
 
@@ -39,7 +44,16 @@ public class RobotMecanum// extends Robot
     final double CLAW_EXTENDED = 0.38;
     double clawPosition = CLAW_HOME;
 
+
+    //Sensors
     GyroSensor gyro;
+    ModernRoboticsI2cRangeSensor rangeSensorRightFront;
+    ModernRoboticsI2cRangeSensor rangeSensorRightBack;
+    ModernRoboticsI2cRangeSensor rangeSensorLeftFront;
+    ModernRoboticsI2cRangeSensor rangeSensorLeftBack;
+
+    //ColorSensor colorSensorRight;
+    //ColorSensor colorSensorLeft;
 
     //=======================================================
     OpMode opMode;
@@ -76,7 +90,14 @@ public class RobotMecanum// extends Robot
 
         //Claw
         claw = hardwareMap.servo.get("claw");
-        claw.setPosition(CLAW_HOME);
+        claw.setDirection(Servo.Direction.REVERSE);
+        //claw.setPosition(CLAW_HOME);
+
+        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+
 
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
@@ -93,11 +114,11 @@ public class RobotMecanum// extends Robot
 
         return totalTicks;
     }
-    public void moveOmni(double left_stick_y, double left_stick_x, double right_stick_x)
+    public void moveOmni(double drivePower, double strafePower, double rotatePower)
     {
-        double drive = Math.signum(-left_stick_y) * Math.pow(left_stick_y, 4);
-        double strafe = Math.signum(left_stick_x) * Math.pow(left_stick_x, 4);
-        double rotate = right_stick_x;
+        double drive = Math.signum(-drivePower) * Math.pow(drivePower, 4);
+        double strafe = Math.signum(strafePower) * Math.pow(strafePower, 4);
+        double rotate = rotatePower;
 
         double frontLeftPower = drive + strafe + rotate;
         double backLeftPower = drive - strafe + rotate;
@@ -143,8 +164,37 @@ public class RobotMecanum// extends Robot
         backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        moveOmni( 0, 0, power);
+
+        moveOmni(0, 0, power);
     }
+
+    /**
+     *
+     * @param distanceFromWall distance to stop from the wall in inches
+     * @param power power to run the motors. + is to the right, - is to the left
+     */
+    public void strafeRange(int distanceFromWall, double power){
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if(power > 0){
+            moveOmni(0,power,0);
+            while(rangeSensorRightFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorRightBack.getDistance(DistanceUnit.INCH) > distanceFromWall){
+                telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+            }
+            moveOmni(0,0,0);
+        }
+
+        if(power < 0){
+            moveOmni(0,power,0);
+            while(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorLeftBack.getDistance(DistanceUnit.INCH) > distanceFromWall);
+            moveOmni(0,0,0);
+        }
+
+    }
+
     public void incrementalDrive(double distance, double power, boolean isStrafe)
     {
         for(int i = 0; i < distance/2; i++)

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 // backs up to the starting point using encoders to measure the distance.
 // This example assumes there is one encoder, attached to the left motor
 
-@Autonomous(name="AutonomousTest")
+@Autonomous(name="AutonomousDriverTest")
 //@disabled
 public class AutonomousTest extends LinearOpMode
 {
@@ -23,12 +24,19 @@ public class AutonomousTest extends LinearOpMode
     public void runOpMode() throws InterruptedException
     {
         RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this);
-        TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
+        //TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
         //tensorflow.initVuforia();
 
-        robotMecanum.hooks(true);
-        robotMecanum.claw(true);
+        //robotMecanum.gyro.calibrate();
+
+        //==========================================================================================
+        //Pre init
+
+        //tensorflow.initVuforia();
+
+        //robotMecanum.hooks(true);
+        //robotMecanum.claw(true);
 
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
@@ -39,14 +47,16 @@ public class AutonomousTest extends LinearOpMode
 
         //==========================================================================================
         //Official Start
+        while(opModeIsActive()){
+            telemetry.addData("back right distance", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
+            telemetry.addData("front right distance", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+            telemetry.addData("back left distance", robotMecanum.rangeSensorLeftBack.getDistance(DistanceUnit.INCH));
+            telemetry.addData("front left distance", robotMecanum.rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+        }
 
-        robotMecanum.drive(20, 1);
 
-        telemetry.addData("----", " :----");
-        telemetry.update();
-
-        robotMecanum.incrementalDrive(20, 0.5, false);
-
+        //robotMecanum.strafeRange(4, 1.0);
 
         /*
         robot.move(30, 1, false);

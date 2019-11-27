@@ -16,12 +16,6 @@ public class TeleopMecanum extends OpMode
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
 
-    //Claw
-    Servo claw;
-    final double CLAW_HOME = 0.0;
-    final double CLAW_EXTENDED = 0.38;
-    double clawPosition = CLAW_HOME;
-
     RobotMecanum robotMecanum;
 
     //Runs once on init
@@ -89,6 +83,9 @@ public class TeleopMecanum extends OpMode
 
          */
         robotMecanum.lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
+
+        robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
+        robotMecanum.leftHook.setPosition(1-gamepad1.left_trigger);
 
 
         telemetry.update();
