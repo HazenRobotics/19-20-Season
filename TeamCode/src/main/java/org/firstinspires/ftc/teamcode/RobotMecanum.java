@@ -145,6 +145,21 @@ public class RobotMecanum// extends Robot
         backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         moveOmni( 0, 0, power);
     }
+    public void incrementalDrive(double distance, double power, boolean isStrafe)
+    {
+        for(int i = 0; i < distance/2; i++)
+        {
+            frontLeftWheel.setTargetPosition(convertDistTicks(2, WHEEL_DIAMETER * Math.PI));
+            backLeftWheel.setTargetPosition(convertDistTicks(2, WHEEL_DIAMETER * Math.PI));
+            frontRightWheel.setTargetPosition(convertDistTicks(2, WHEEL_DIAMETER * Math.PI));
+            backRightWheel.setTargetPosition(convertDistTicks(2, WHEEL_DIAMETER * Math.PI));
+
+            if (isStrafe)
+                moveOmni( 0, power, 0);
+            else
+                moveOmni( power, 0, 0);
+        }
+    }
     public void claw(boolean clawHome)
     {
         if (clawHome)

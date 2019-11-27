@@ -47,7 +47,9 @@ public class AutonomousTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        robotMecanum.drive(10, 100);
+        robotMecanum.incrementalDrive(20, 0.5, false);
+
+        //robotMecanum.drive(10, 100);
 
         /*
         robot.move(30, 1, false);
