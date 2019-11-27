@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 // backs up to the starting point using encoders to measure the distance.
 // This example assumes there is one encoder, attached to the left motor
 
-@Autonomous(name="AutonomousDriverTest")
+@Autonomous(name="AutonomousTest")
 //@disabled
 public class AutonomousTest extends LinearOpMode
 {
@@ -25,14 +25,7 @@ public class AutonomousTest extends LinearOpMode
         RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this);
         TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
 
-        tensorflow.initVuforia();
-
-        robotMecanum.gyro.calibrate();
-
-        //==========================================================================================
-        //Pre init
-
-        tensorflow.initVuforia();
+        //tensorflow.initVuforia();
 
         robotMecanum.hooks(true);
         robotMecanum.claw(true);
@@ -47,9 +40,13 @@ public class AutonomousTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
+        robotMecanum.drive(20, 1);
+
+        telemetry.addData("----", " :----");
+        telemetry.update();
+
         robotMecanum.incrementalDrive(20, 0.5, false);
 
-        //robotMecanum.drive(10, 100);
 
         /*
         robot.move(30, 1, false);
