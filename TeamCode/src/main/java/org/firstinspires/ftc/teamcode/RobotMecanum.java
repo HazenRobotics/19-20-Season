@@ -264,36 +264,26 @@ public class RobotMecanum// extends Robot
         telemetry.addData("turnGyro", "running");
         telemetry.update();
 
-        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         gyro.resetZAxisIntegrator();
         if(turnRight)
         {
-            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
-            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
-
-            backRightWheel.setPower(power);
-            backLeftWheel.setPower(power);
-
-            while(gyro.getHeading() + 180 < 180 - turningDegrees) {}
+            //mostly works --- turned right 270 when I wanted it to move 90 right at 0.7 power
+            while(gyro.getHeading() + 180 < 180 + turningDegrees)
+            {
+                moveOmni(0, 0, power);
+            }
         }
+        //doesn't work --- had to leave didn't get to finishing this up.
         else
         {
-            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
-            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
-
-            backRightWheel.setPower(power);
-            backLeftWheel.setPower(power);
-
-            while(gyro.getHeading() + 180 < 180 + turningDegrees) {}
+            while(gyro.getHeading() + 180 < 180 - turningDegrees)
+            {
+                moveOmni(0, 0, -power);
+            }
         }
 
-        backRightWheel.setPower(0);
-        backLeftWheel.setPower(0);
+        moveOmni(0, 0, 0);
 
-        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
 

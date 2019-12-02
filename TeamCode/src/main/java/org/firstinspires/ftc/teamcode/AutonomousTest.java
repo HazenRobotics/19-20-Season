@@ -56,8 +56,9 @@ public class AutonomousTest extends LinearOpMode
             telemetry.update();
         }*/
 
+        robotMecanum.turnGyro(90,0.7,true);
 
-        robotMecanum.strafeRange(12, 0.7);
+        //robotMecanum.strafeRange(12, 0.7);
 
         /*
         robot.move(30, 1, false);
