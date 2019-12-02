@@ -34,7 +34,7 @@ public class RobotMecanum// extends Robot
     Servo rightHook;
     final double LEFT_HOOK_HOME = 0.5;
     final double RIGHT_HOOK_HOME = 0.5;
-    final double LEFT_HOOK_EXTENDED = 0.0;
+    final double LEFT_HOOK_EXTENDED = 1.0;
     final double RIGHT_HOOK_EXTENDED = 1.0;
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
@@ -84,6 +84,8 @@ public class RobotMecanum// extends Robot
 
         leftHook = hardwareMap.servo.get("left_hook");
         rightHook = hardwareMap.servo.get("right_hook");
+
+        leftHook.setDirection(Servo.Direction.REVERSE);
 
         //Reverse the two flipped wheels
         frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
@@ -189,13 +191,17 @@ public class RobotMecanum// extends Robot
             moveOmni(0,power,0);
             while(rangeSensorRightFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorRightBack.getDistance(DistanceUnit.INCH) > distanceFromWall){
                 telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+                telemetry.update();
             }
             moveOmni(0,0,0);
         }
 
-        if(power < 0){
+        else{
             moveOmni(0,power,0);
-            while(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorLeftBack.getDistance(DistanceUnit.INCH) > distanceFromWall);
+            while(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorLeftBack.getDistance(DistanceUnit.INCH) > distanceFromWall){
+                telemetry.addData("distance from wall", rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
             moveOmni(0,0,0);
         }
 

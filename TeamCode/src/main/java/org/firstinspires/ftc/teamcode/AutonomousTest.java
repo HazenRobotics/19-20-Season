@@ -57,7 +57,7 @@ public class AutonomousTest extends LinearOpMode
         }*/
 
 
-        robotMecanum.strafeRange(12, 0.2);
+        robotMecanum.strafeRange(12, 0.7);
 
         /*
         robot.move(30, 1, false);
