@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.SerialNumber;
@@ -97,6 +98,11 @@ public class RobotMecanum// extends Robot
         rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
         rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
         rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+
+        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
+        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
+        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
 
         gyro = hardwareMap.gyroSensor.get("gyro");

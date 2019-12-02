@@ -47,16 +47,17 @@ public class AutonomousTest extends LinearOpMode
 
         //==========================================================================================
         //Official Start
-        while(opModeIsActive()){
+
+        /*while(opModeIsActive()){
             telemetry.addData("back right distance", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
             telemetry.addData("front right distance", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
             telemetry.addData("back left distance", robotMecanum.rangeSensorLeftBack.getDistance(DistanceUnit.INCH));
             telemetry.addData("front left distance", robotMecanum.rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
             telemetry.update();
-        }
+        }*/
 
 
-        //robotMecanum.strafeRange(4, 1.0);
+        robotMecanum.strafeRange(12, 0.2);
 
         /*
         robot.move(30, 1, false);

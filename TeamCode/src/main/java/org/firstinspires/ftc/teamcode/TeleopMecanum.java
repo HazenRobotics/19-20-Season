@@ -62,7 +62,7 @@ public class TeleopMecanum extends OpMode
         }
 
         //Driving
-        robotMecanum.moveOmni(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
         /*
         //Lift
@@ -83,9 +83,6 @@ public class TeleopMecanum extends OpMode
 
          */
         robotMecanum.lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
-
-        robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
-        robotMecanum.leftHook.setPosition(1-gamepad1.left_trigger);
 
 
         telemetry.update();
