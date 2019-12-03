@@ -19,8 +19,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class RobotMecanum// extends Robot
 {
+    int P, I, D;
+    int integral,previous_error;
+    double previousTime;
+
     final int TICK_PER_REVOLUTION = 1440;
     final double WHEEL_DIAMETER = 4;
+    final int GEAR_RATIO = 2;
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
@@ -42,8 +47,8 @@ public class RobotMecanum// extends Robot
 
 
     Servo claw;
-    final double CLAW_HOME = 0.0;
-    final double CLAW_EXTENDED = 0.38;
+    final double CLAW_HOME = convertDegreeToPercent(0.0,180.0);
+    final double CLAW_EXTENDED = convertDegreeToPercent(170.0,180.0);
     double clawPosition = CLAW_HOME;
 
 
@@ -89,8 +94,8 @@ public class RobotMecanum// extends Robot
         leftHook.setDirection(Servo.Direction.REVERSE);
 
         //Reverse the two flipped wheels
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
         //Claw
         claw = hardwareMap.servo.get("claw");
@@ -119,13 +124,13 @@ public class RobotMecanum// extends Robot
         //1 rotation = 4
 
         double revolutions = distanceToTravel / circumfrence;
-        int totalTicks = (int) Math.round(revolutions * TICK_PER_REVOLUTION);
+        int totalTicks = (int) Math.round(revolutions * TICK_PER_REVOLUTION / GEAR_RATIO);
 
         return totalTicks;
     }
     public void moveOmni(double drivePower, double strafePower, double rotatePower)
     {
-        double drive = Math.signum(-drivePower) * Math.pow(drivePower, 4);
+        double drive = Math.signum(drivePower) * Math.pow(drivePower, 4);
         double strafe = Math.signum(strafePower) * Math.pow(strafePower, 4);
         double rotate = rotatePower;
 
@@ -133,11 +138,6 @@ public class RobotMecanum// extends Robot
         double backLeftPower = drive - strafe + rotate;
         double frontRightPower = drive - strafe - rotate;
         double backRightPower = drive + strafe - rotate;
-
-        //frontLeftPower = drive + strafe + rotate;
-        //backLeftPower = drive - strafe + rotate;
-        //frontRightPower = drive - strafe - rotate;
-        //backRightPower = drive + strafe - rotate;
 
         //Set the wheel power according to variables
         frontLeftWheel.setPower(frontLeftPower);
@@ -153,11 +153,55 @@ public class RobotMecanum// extends Robot
     }
     public void drive (double distance, double power)
     {
-        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+
         moveOmni( power, 0, 0);
+
+
+        backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (backLeftWheel.isBusy())
+        {
+            telemetry.addData("encoder-fwdBL", backLeftWheel.getCurrentPosition()
+                    + "  busy=" + backLeftWheel.isBusy());
+            telemetry.addData("encoder-fwdBR", backRightWheel.getCurrentPosition()
+                    + "  busy=" + backRightWheel.isBusy());
+            telemetry.addData("encoder-fwdFL", backLeftWheel.getCurrentPosition()
+                    + "  busy=" + frontLeftWheel.isBusy());
+            telemetry.addData("encoder-fwd", backRightWheel.getCurrentPosition()
+                    + "  busy=" + frontRightWheel.isBusy());
+            telemetry.update();
+        }
+
+        // set motor power to zero to turn off motors. The motors stop on their own but
+        // power is still applied so we turn off the power.
+        backRightWheel.setPower(0.0);
+        backLeftWheel.setPower(0.0);
+        frontRightWheel.setPower(0.0);
+        frontLeftWheel.setPower(0.0);
+
+
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void strafe(double distance, double power)
     {
@@ -188,20 +232,28 @@ public class RobotMecanum// extends Robot
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        gyro.resetZAxisIntegrator();
+
+        previousTime = opMode.getRuntime();
+
         if(power > 0){
             moveOmni(0,power,0);
-            while(rangeSensorRightFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorRightBack.getDistance(DistanceUnit.INCH) > distanceFromWall){
+            while((rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall){
+                moveOmni(0, power, gyroPID(0, opMode.getRuntime() - previousTime));
                 telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
                 telemetry.update();
+                previousTime = opMode.getRuntime();
             }
             moveOmni(0,0,0);
         }
 
         else{
             moveOmni(0,power,0);
-            while(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) > distanceFromWall || rangeSensorLeftBack.getDistance(DistanceUnit.INCH) > distanceFromWall){
+            while((rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall){
+                moveOmni(0, power, gyroPID(0, opMode.getRuntime() - previousTime));
                 telemetry.addData("distance from wall", rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
                 telemetry.update();
+                previousTime = opMode.getRuntime();
             }
             moveOmni(0,0,0);
         }
@@ -285,5 +337,18 @@ public class RobotMecanum// extends Robot
         moveOmni(0, 0, 0);
 
     }
+
+    public double convertDegreeToPercent(double desiredAngle, double maxAngle)
+    {
+        return desiredAngle/maxAngle;
+    }
+
+    public double gyroPID(int targetAngle, double time){
+        int error = targetAngle - gyro.getHeading(); // Error = Target - Actual
+        this.integral += (error*time); // Integral is increased by the error*time
+        double derivative = (error - this.previous_error) / time;
+        return P*error + I*this.integral + D*derivative;
+    }
+
 }
 
