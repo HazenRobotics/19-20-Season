@@ -1,25 +1,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.SerialNumber;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class RobotMecanum// extends Robot
 {
-    int P, I, D;
+    double P = 0.0135, I = 0.02025, D = 0;
     int integral,previous_error;
     double previousTime;
 
@@ -74,12 +69,15 @@ public class RobotMecanum// extends Robot
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
 
+
         hardwareMap = hMap;
         this.opMode = opMode;
         //this.opMode = (LinearOpMode) opMode;
         telemetry = opMode.telemetry;
 
         //super(hMap, opMode);
+
+        telemetry.setAutoClear(false);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -112,9 +110,14 @@ public class RobotMecanum// extends Robot
         rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
         rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
-
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
+        while(gyro.isCalibrating());
+    }
+    public void printGyroHeading()
+    {
+        telemetry.addData("Gyro Heading", gyro.getHeading() );
+        telemetry.update();
     }
     //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
@@ -128,10 +131,10 @@ public class RobotMecanum// extends Robot
 
         return totalTicks;
     }
-    public void moveOmni(double drivePower, double strafePower, double rotatePower)
+    public void moveOmni(double drivePower, double strafePower, double rotatePower)// add parameter, boolean setPowerZero
     {
         double drive = Math.signum(drivePower) * Math.pow(drivePower, 4);
-        double strafe = Math.signum(strafePower) * Math.pow(strafePower, 4);
+        double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 4);
         double rotate = rotatePower;
 
         double frontLeftPower = drive + strafe + rotate;
@@ -226,7 +229,8 @@ public class RobotMecanum// extends Robot
      * @param distanceFromWall distance to stop from the wall in inches
      * @param power power to run the motors. + is to the right, - is to the left
      */
-    public void strafeRange(int distanceFromWall, double power){
+    public void strafeRange(int distanceFromWall, double power)
+    {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -236,10 +240,12 @@ public class RobotMecanum// extends Robot
 
         previousTime = opMode.getRuntime();
 
-        if(power > 0){
-            moveOmni(0,power,0);
-            while((rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall){
-                moveOmni(0, power, gyroPID(0, opMode.getRuntime() - previousTime));
+        if(power > 0)
+        {
+            moveOmni(0, power,0);
+            while((rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+            {
+                moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
                 telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
                 telemetry.update();
                 previousTime = opMode.getRuntime();
@@ -247,10 +253,12 @@ public class RobotMecanum// extends Robot
             moveOmni(0,0,0);
         }
 
-        else{
-            moveOmni(0,power,0);
-            while((rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall){
-                moveOmni(0, power, gyroPID(0, opMode.getRuntime() - previousTime));
+        else
+            {
+            moveOmni(0, power,0);
+            while( (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall )
+            {
+                moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
                 telemetry.addData("distance from wall", rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
                 telemetry.update();
                 previousTime = opMode.getRuntime();
@@ -270,6 +278,62 @@ public class RobotMecanum// extends Robot
                 drive(2, power);
         }
     }
+    public double convertDegreeToPercent(double desiredAngle, double maxAngle)
+    {
+        return desiredAngle/maxAngle;
+    }
+    public double gyroPID(int targetAngle, double time)
+    {
+        int error = targetAngle - getNewGyroHeading(); // Error = Target - Actual
+        this.integral += (error * time); // Integral is increased by the error*time
+        double derivative = (error - this.previous_error) / time;
+        telemetry.addData("PID correction value:", P * error);
+        telemetry.update();
+        return P * error + I * this.integral + D * derivative;
+    }
+    public int getNewGyroHeading()
+    {
+        return (gyro.getHeading() + 180 ) % 360;
+    }
+    //==============================================================================================   turnGyro
+    //not ready or programmed yet
+    public void turnGyro(double turningDegrees, double power, boolean turnRight)
+    {
+
+        telemetry.addData("turnGyro", "running");
+
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        gyro.resetZAxisIntegrator();
+        if(turnRight)
+        {
+            //mostly works --- turned right 270 when I wanted it to move 90 right at 0.7 power
+            moveOmni(0, 0, -power);
+            while( getNewGyroHeading() > 180 - turningDegrees)
+            {
+                telemetry.addData("New While:", getNewGyroHeading() > 180 - turningDegrees);
+                telemetry.addData("Heading + 180:", getNewGyroHeading());
+                telemetry.update();
+            }
+            moveOmni(0, 0, 0);
+        }
+        //doesn't work --- had to leave didn't get to finishing this up.
+        else
+        {
+            moveOmni(0, 0, power);
+            while( getNewGyroHeading() < 180 + turningDegrees)
+            {
+                telemetry.addData("While:", getNewGyroHeading() < 180 + turningDegrees);
+                telemetry.addData("Heading + 180:", getNewGyroHeading());
+                telemetry.update();
+            }
+            moveOmni(0, 0, 0);
+        }
+    }
+
     public void claw(boolean clawHome)
     {
         if (clawHome)
@@ -308,46 +372,6 @@ public class RobotMecanum// extends Robot
         telemetry.addData("Left Hook Position: ", leftHook.getPosition());
         telemetry.addData("Right Hook Position: ", rightHook.getPosition());
         telemetry.update();
-    }
-    //==============================================================================================   turnGyro
-    //not ready or programmed yet
-    public void turnGyro(double turningDegrees, double power, boolean turnRight)
-    {
-        telemetry.addData("turnGyro", "running");
-        telemetry.update();
-
-        gyro.resetZAxisIntegrator();
-        if(turnRight)
-        {
-            //mostly works --- turned right 270 when I wanted it to move 90 right at 0.7 power
-            while(gyro.getHeading() + 180 < 180 + turningDegrees)
-            {
-                moveOmni(0, 0, power);
-            }
-        }
-        //doesn't work --- had to leave didn't get to finishing this up.
-        else
-        {
-            while(gyro.getHeading() + 180 < 180 - turningDegrees)
-            {
-                moveOmni(0, 0, -power);
-            }
-        }
-
-        moveOmni(0, 0, 0);
-
-    }
-
-    public double convertDegreeToPercent(double desiredAngle, double maxAngle)
-    {
-        return desiredAngle/maxAngle;
-    }
-
-    public double gyroPID(int targetAngle, double time){
-        int error = targetAngle - gyro.getHeading(); // Error = Target - Actual
-        this.integral += (error*time); // Integral is increased by the error*time
-        double derivative = (error - this.previous_error) / time;
-        return P*error + I*this.integral + D*derivative;
     }
 
 }

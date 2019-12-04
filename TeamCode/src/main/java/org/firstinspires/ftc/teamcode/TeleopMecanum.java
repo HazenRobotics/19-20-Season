@@ -10,9 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="TeleOpMecanum")
 public class TeleopMecanum extends OpMode
 {
-
-
-
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
 
@@ -31,6 +28,7 @@ public class TeleopMecanum extends OpMode
     @Override
     public void loop()
     {
+        robotMecanum.printGyroHeading();
         telemetry.addData("           Controls", "   ");
         telemetry.addData("Steering", "Gp1: left stick y (axis) = drive");
         telemetry.addData("Steering", "Gp1: left stick x (axis) = strafe");
@@ -62,7 +60,7 @@ public class TeleopMecanum extends OpMode
         }
 
         //Driving
-        robotMecanum.moveOmni(-gamepad1.left_stick_y, -gamepad1.right_stick_x, -gamepad1.left_stick_x);
+        robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.right_stick_x, -gamepad1.left_stick_x);
 
         robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
         robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
