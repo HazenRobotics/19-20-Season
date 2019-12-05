@@ -19,24 +19,26 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 //@disabled
 public class AutonomousTest extends LinearOpMode
 {
+    RobotMecanum robotMecanum;
+    TensorFlow tensorflow;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
-        RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this);
-        //TensorFlow tensorflow = new TensorFlow(hardwareMap, this);
+        robotMecanum = new RobotMecanum(hardwareMap, this);
+        tensorflow = new TensorFlow(hardwareMap, this);
 
         //tensorflow.initVuforia();
 
-        //robotMecanum.gyro.calibrate();
+        robotMecanum.gyro.calibrate();
 
         //==========================================================================================
         //Pre init
 
         //tensorflow.initVuforia();
 
-        //robotMecanum.hooks(true);
-        //robotMecanum.claw(true);
+        robotMecanum.hooks(true);
+        robotMecanum.claw(true);
 
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
@@ -56,74 +58,35 @@ public class AutonomousTest extends LinearOpMode
             telemetry.update();
         }*/
 
-        //robotMecanum.turnGyro(90,0.25,true);
+        //step one, move forward to scan blocks
+        robotMecanum.drive(18, 0.75);
 
-        robotMecanum.strafeRange(12, 0.8);
 
-        //robotMecanum.strafeRange(12, 0.7);
+        //scan blocks
+        robotMecanum.tensorFlowDrive();
+
+        tensorFlowDrive();
+
+        //return back to center
+        //skystoneReturn();
+
+        //
+        //robotMecanum.strafeRange(18, 0.75, true);
+
+
+
+        //robotMecanum.turnGyro(90,0.2,true);
+
+
 
         /*
-        robot.move(30, 1, false);
-        sleep(250);
-
-        leftClapper.setPosition(0.5);
-
-        robot.turn(90,1,false,true);
-        sleep(250);
-
-        robot.clapper(true);
-        robot.move(4, 1, false);
-        sleep(250);
-
-        robot.hooks(false);
-        sleep(500);
-
-        robot.move(6, 1, true);
-        sleep(500);
-
-        robot.turnGyro(45,0.75,false);
-        sleep(250);
-
-        robot.move(25, 1, false);
-        sleep(250);
-
-        robot.hooks(true);
-        sleep(250);
-
-        robot.move(2, 1, true);
-        sleep(250);
-
-        robot.turn(135,1,true,true);
-        sleep(250);
-
-        robot.move(16, 1, true);
-        sleep(250);
-
-        //turn backwards left
-        robot.turn(90,1,false,true);
-        sleep(250);
-
-        robot.move(20, 1, false);
-        sleep(250);
-
-        robot.move(78, 1, true);
-        sleep(250);
-
-        robot.turnOnSpot(90,1,true);
-        sleep(250);
-
-        robot.move(6, 1, false);
-        sleep(250);
-
-
-
         robot.hooks(false);
         sleep(500);
 
         tensorflow.tensorFlow();
         sleep(250);
 
-        robot.tensorFlowDrive();
+
         */
 
 
@@ -133,6 +96,86 @@ public class AutonomousTest extends LinearOpMode
 
     //==============================================================================================
 
+    public void skystoneReturn()
+    {
+        robotMecanum.strafeRange(74, 0.75, false);
+    }
+
+    public void skystoneNone()
+    {
+        //strafe over to block
+        robotMecanum.strafeRange(14, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        //robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void skystoneLeft()
+    {
+        //strafe over to block
+        robotMecanum.strafeRange(22, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        //robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void skystoneRight()
+    {
+        //strafe over to block
+        robotMecanum.strafeRange(30, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        //robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void tensorFlowDrive()
+    {
+        if ( robotMecanum.skystoneLocation.equals("none") )
+        {
+            telemetry.addData("move to the skystone offscreen", "");
+            skystoneNone();
+        }
+        else if ( robotMecanum.skystoneLocation.equals("left") )
+        {
+            telemetry.addData("move to the left skystone position", "");
+            skystoneLeft();
+        }
+        else if ( robotMecanum.skystoneLocation.equals("right") )
+        {
+            telemetry.addData("move to the right skystone position", "");
+            skystoneRight();
+        }
+        else
+            telemetry.addData("Error: ", "No Move");
+        telemetry.update();
+    }
 
 
 }

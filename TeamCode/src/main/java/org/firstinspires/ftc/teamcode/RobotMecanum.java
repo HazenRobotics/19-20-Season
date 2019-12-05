@@ -14,6 +14,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class RobotMecanum// extends Robot
 {
+
+    protected String skystoneLocation = "";
+
     double P = 0.0135, I = 0.02025, D = 0;
     int integral,previous_error;
     double previousTime;
@@ -33,10 +36,10 @@ public class RobotMecanum// extends Robot
 
     Servo leftHook;
     Servo rightHook;
-    final double LEFT_HOOK_HOME = 0.5;
-    final double RIGHT_HOOK_HOME = 0.5;
-    final double LEFT_HOOK_EXTENDED = 1.0;
-    final double RIGHT_HOOK_EXTENDED = 1.0;
+    final double LEFT_HOOK_HOME = 1.0;
+    final double RIGHT_HOOK_HOME = 1.0;
+    final double LEFT_HOOK_EXTENDED = 0.5;
+    final double RIGHT_HOOK_EXTENDED =0.5;
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
 
@@ -77,9 +80,11 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        telemetry.setAutoClear(false);
+        telemetry.setAutoClear(true);
 
         lift = hardwareMap.dcMotor.get("lift");
+
+        tensorFlow = new TensorFlow(hardwareMap, opMode);
 
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
@@ -131,7 +136,7 @@ public class RobotMecanum// extends Robot
 
         return totalTicks;
     }
-    public void moveOmni(double drivePower, double strafePower, double rotatePower)// add parameter, boolean setPowerZero
+    public void moveOmni(double drivePower, double strafePower, double rotatePower)
     {
         double drive = Math.signum(drivePower) * Math.pow(drivePower, 4);
         double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 4);
@@ -182,14 +187,10 @@ public class RobotMecanum// extends Robot
 
         while (backLeftWheel.isBusy())
         {
-            telemetry.addData("encoder-fwdBL", backLeftWheel.getCurrentPosition()
-                    + "  busy=" + backLeftWheel.isBusy());
-            telemetry.addData("encoder-fwdBR", backRightWheel.getCurrentPosition()
-                    + "  busy=" + backRightWheel.isBusy());
-            telemetry.addData("encoder-fwdFL", backLeftWheel.getCurrentPosition()
-                    + "  busy=" + frontLeftWheel.isBusy());
-            telemetry.addData("encoder-fwd", backRightWheel.getCurrentPosition()
-                    + "  busy=" + frontRightWheel.isBusy());
+            telemetry.addData("encoder-fwdBL", backLeftWheel.getCurrentPosition() + "  busy=" + backLeftWheel.isBusy());
+            telemetry.addData("encoder-fwdBR", backRightWheel.getCurrentPosition() + "  busy=" + backRightWheel.isBusy());
+            telemetry.addData("encoder-fwdFL", backLeftWheel.getCurrentPosition() + "  busy=" + frontLeftWheel.isBusy());
+            telemetry.addData("encoder-fwd", backRightWheel.getCurrentPosition() + "  busy=" + frontRightWheel.isBusy());
             telemetry.update();
         }
 
@@ -214,22 +215,19 @@ public class RobotMecanum// extends Robot
         backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
         moveOmni( 0, power, 0);
     }
-    public void rotate(double distance, double power)
-    {
-        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-
-        moveOmni(0, 0, power);
-    }
 
     /**
+     * + power and isRightSensor moves towards right wall
+     * <br>- power and isRightSensor moves away from right wall
+     * <br>+ power and !isRightSensor moves away from left wall
+     * <br>- power and !isRightSensor moves towards left wall
      *
      * @param distanceFromWall distance to stop from the wall in inches
-     * @param power power to run the motors. + is to the right, - is to the left
+     * @param power power to run the motors. + moves right, - moves left
+     * @param isRightSensor if the robot should use the right sensors
+     *
      */
-    public void strafeRange(int distanceFromWall, double power)
+    public void strafeRange(int distanceFromWall, double power, boolean isRightSensor)
     {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -240,32 +238,19 @@ public class RobotMecanum// extends Robot
 
         previousTime = opMode.getRuntime();
 
-        if(power > 0)
-        {
-            moveOmni(0, power,0);
-            while((rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
-            {
-                moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
-                telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
-                telemetry.update();
-                previousTime = opMode.getRuntime();
-            }
-            moveOmni(0,0,0);
-        }
+        moveOmni(0, power, 0);
 
-        else
-            {
-            moveOmni(0, power,0);
-            while( (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall )
-            {
-                moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
-                telemetry.addData("distance from wall", rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
-                telemetry.update();
-                previousTime = opMode.getRuntime();
-            }
-            moveOmni(0,0,0);
+        // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
+        while((power > 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+                || (power > 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+                || (power < 0 && isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+                || (power < 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)){
+            moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
+            telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+            previousTime = opMode.getRuntime();
         }
-
+        moveOmni(0,0,0);
     }
 
     public void incrementalDrive(double distance, double power, boolean isStrafe)
@@ -371,6 +356,31 @@ public class RobotMecanum// extends Robot
 
         telemetry.addData("Left Hook Position: ", leftHook.getPosition());
         telemetry.addData("Right Hook Position: ", rightHook.getPosition());
+        telemetry.update();
+    }
+    public void shuffle(double power, double distance)
+    {
+        for(int i = 0; i < 3; i++)
+            drive(distance, power);
+        for(int i = 0; i < 3; i++)
+            drive(-distance, power);
+    }
+    public void tensorFlowDrive()
+    {
+        do
+        {
+            tensorFlow.tensorFlow();
+            shuffle(0.2, 1);
+        }while(tensorFlow.needsShuffle);
+
+        if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)
+            skystoneLocation = "none";
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.left)
+            skystoneLocation = "left";
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.right)
+            skystoneLocation = "right";
+        else
+            telemetry.addData("Error: ", "No Move");
         telemetry.update();
     }
 
