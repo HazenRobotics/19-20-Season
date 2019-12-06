@@ -20,22 +20,20 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 public class AutonomousTest extends LinearOpMode
 {
     RobotMecanum robotMecanum;
-    TensorFlow tensorflow;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this);
-        tensorflow = new TensorFlow(hardwareMap, this);
+        robotMecanum = new RobotMecanum(hardwareMap, this, true);
 
-        //tensorflow.initVuforia();
+        robotMecanum.initiateVuforia();
 
         robotMecanum.gyro.calibrate();
 
         //==========================================================================================
         //Pre init
 
-        //tensorflow.initVuforia();
+
 
         robotMecanum.hooks(true);
         robotMecanum.claw(true);
@@ -45,50 +43,31 @@ public class AutonomousTest extends LinearOpMode
 
         waitForStart();
 
-
-
         //==========================================================================================
         //Official Start
 
-        /*while(opModeIsActive()){
-            telemetry.addData("back right distance", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
-            telemetry.addData("front right distance", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
-            telemetry.addData("back left distance", robotMecanum.rangeSensorLeftBack.getDistance(DistanceUnit.INCH));
-            telemetry.addData("front left distance", robotMecanum.rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
-            telemetry.update();
-        }*/
-
         //step one, move forward to scan blocks
-        robotMecanum.drive(18, 0.75);
+        robotMecanum.drive(14, 0.75);
 
-
-        //scan blocks
+        //scan blocks ands organize information
         robotMecanum.tensorFlowDrive();
 
+        telemetry.addData("running tensorFlowDrive", "");
+        telemetry.update();
+        //tensor flow "drive"
         tensorFlowDrive();
 
+        telemetry.addData("tensorFlowDrive finished", "");
+        telemetry.update();
+
         //return back to center
-        //skystoneReturn();
+        skystoneReturn();
 
-        //
+
+
+
         //robotMecanum.strafeRange(18, 0.75, true);
-
-
-
         //robotMecanum.turnGyro(90,0.2,true);
-
-
-
-        /*
-        robot.hooks(false);
-        sleep(500);
-
-        tensorflow.tensorFlow();
-        sleep(250);
-
-
-        */
-
 
 
     }
@@ -110,7 +89,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(12, 0.75);
 
         //pickup block
-        //robotMecanum.claw(true);
+        robotMecanum.claw(true);
 
         //drive backward
         robotMecanum.drive(-12, 0.75);
@@ -128,7 +107,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(12, 0.75);
 
         //pickup block
-        //robotMecanum.claw(true);
+        robotMecanum.claw(true);
 
         //drive backward
         robotMecanum.drive(-12, 0.75);
@@ -146,7 +125,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(12, 0.75);
 
         //pickup block
-        //robotMecanum.claw(true);
+        robotMecanum.claw(true);
 
         //drive backward
         robotMecanum.drive(-12, 0.75);

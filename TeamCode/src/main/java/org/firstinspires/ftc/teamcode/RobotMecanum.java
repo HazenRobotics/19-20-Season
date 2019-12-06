@@ -46,7 +46,7 @@ public class RobotMecanum// extends Robot
 
     Servo claw;
     final double CLAW_HOME = convertDegreeToPercent(0.0,180.0);
-    final double CLAW_EXTENDED = convertDegreeToPercent(170.0,180.0);
+    final double CLAW_EXTENDED = convertDegreeToPercent(120.0,180.0);
     double clawPosition = CLAW_HOME;
 
 
@@ -69,7 +69,7 @@ public class RobotMecanum// extends Robot
     TensorFlow tensorFlow;
 
     //==============================================================================================   Robot method
-    public RobotMecanum(HardwareMap hMap, OpMode opMode)
+    public RobotMecanum(HardwareMap hMap, OpMode opMode, boolean isAutonimous)
     {
 
 
@@ -83,8 +83,6 @@ public class RobotMecanum// extends Robot
         telemetry.setAutoClear(true);
 
         lift = hardwareMap.dcMotor.get("lift");
-
-        tensorFlow = new TensorFlow(hardwareMap, opMode);
 
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
@@ -105,24 +103,37 @@ public class RobotMecanum// extends Robot
         claw.setDirection(Servo.Direction.REVERSE);
         //claw.setPosition(CLAW_HOME);
 
-        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
-        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
-        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
-        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
-
-        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
-        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
-        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
-
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
         while(gyro.isCalibrating());
+
+        if (isAutonimous)
+        {
+
+            tensorFlow = new TensorFlow(hardwareMap, opMode);
+
+            rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+            rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+            rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+            rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+
+            rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+            rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
+            rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
+            rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
+
+        }
+
     }
+
     public void printGyroHeading()
     {
         telemetry.addData("Gyro Heading", gyro.getHeading() );
         telemetry.update();
+    }
+    public void initiateVuforia()
+    {
+        tensorFlow.tensorFlow();
     }
     //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object

@@ -82,6 +82,8 @@ public class TensorFlow
 
         telemetry.addData("TensorFlow", "setting up hardware");
         telemetry.update();
+
+        initVuforia();
     }
     public void initialModelSetup()
     {

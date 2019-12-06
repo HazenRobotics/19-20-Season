@@ -19,10 +19,9 @@ public class TeleopMecanum extends OpMode
     @Override
     public void init()
     {
-
-        robotMecanum = new RobotMecanum(hardwareMap, this);
-
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
     }
+
 
     //Continues to loop
     @Override
@@ -62,8 +61,8 @@ public class TeleopMecanum extends OpMode
         //Driving
         robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.right_stick_x, -gamepad1.left_stick_x);
 
-        robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
-        robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
+        //robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
+        //robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
 
         /*
         //Lift
