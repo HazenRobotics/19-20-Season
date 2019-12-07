@@ -15,6 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class RobotMecanum// extends Robot
 {
+    long setTime = System.currentTimeMillis();
+    boolean  hasRun = false;
 
     protected String skystoneLocation = "";
 
@@ -98,7 +100,7 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        //telemetry.setAutoClear(false);
+        telemetry.setAutoClear(true);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -154,9 +156,23 @@ public class RobotMecanum// extends Robot
         //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
 
     }
-    public void something()
-    {
 
+    /**
+     *
+     * @param delay - delay/wait time in SECONDS
+     */
+    public void wait(double delay)
+    {
+        while(!hasRun)
+        {
+            if(System.currentTimeMillis() - setTime > (delay* 1000))
+            {
+                hasRun = true;
+            }
+        }
+
+        telemetry.addData("wait finished", "");
+        telemetry.update();
     }
     public void initiateVuforia()
     {

@@ -26,7 +26,7 @@ public class AutonomousTest extends LinearOpMode
     {
         robotMecanum = new RobotMecanum(hardwareMap, this);
 
-        robotMecanum.initiateVuforia();
+        //robotMecanum.initiateVuforia();
 
         robotMecanum.gyro.calibrate();
 
@@ -71,33 +71,59 @@ public class AutonomousTest extends LinearOpMode
 
         robotMecanum.strafeRange(14.5, 0.75, true);
 
-        */
-
         //parking(true, false, 3);
-
-/*
 
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
         */
+        //robotMecanum.strafeRange(16, 0.75, true);
 
-        //robotMecanum.strafeRange(10, 0.75, true);
-        robotMecanum.capper(false);
-        robotMecanum.capper(true);
-        sleep(2000);
 
-        robotMecanum.driveRange(30, 0.5);
-        robotMecanum.hooks(false);
-        robotMecanum.driveRange(1, -0.5);
+
+        driveTime(0.85, 2500);
+
+        //robotMecanum.driveRange(30, 0.75);
+        //robotMecanum.hooks(false);
+        //robotMecanum.driveRange(1, -0.75);
 
         telemetry.addData("step", "finished ");
         telemetry.update();
+
+        //robotMecanum.strafeRange(50, 0.75, true);
 
         //robotMecanum.turnGyro(90,0.2,true);
 
 
     }
 
+    /**
+     *
+     * @param power - sets power to wheels - negative power is backwards
+     * @param time  - amount of time to run the motors
+     */
+    public void driveTime(double power, long time)
+    {
+        //set power to 'drive' motors
+        robotMecanum.moveOmni(power, 0, 0);
+
+        telemetry.addData("move", "finished ");
+        telemetry.update();
+
+        //wait for certain amount of time while motors are running
+        //robotMecanum.wait(time);
+        long setTime = System.currentTimeMillis();
+        while(System.currentTimeMillis() - setTime < (time));
+
+
+        telemetry.addData("timer", "finished ");
+        telemetry.update();
+
+        //sets all power to zero afterwords
+        robotMecanum.moveOmni(0, 0, 0);
+
+        telemetry.addData("set power 0", "finished ");
+        telemetry.update();
+    }
     //==============================================================================================
     /**
      *
