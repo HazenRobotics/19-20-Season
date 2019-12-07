@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,29 +37,48 @@ public class RobotMecanum// extends Robot
 
     Servo leftHook;
     Servo rightHook;
-    final double LEFT_HOOK_HOME = 1.0;
-    final double RIGHT_HOOK_HOME = 1.0;
-    final double LEFT_HOOK_EXTENDED = 0.5;
-    final double RIGHT_HOOK_EXTENDED =0.5;
+    final double LEFT_HOOK_HOME = convertDegreeToPercent(0.0,360.0);
+    final double RIGHT_HOOK_HOME = convertDegreeToPercent(0.0,360.0);
+    final double LEFT_HOOK_EXTENDED = convertDegreeToPercent(280.0,360.0);
+    final double RIGHT_HOOK_EXTENDED = convertDegreeToPercent(280.0,360.0);
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
 
-
     Servo claw;
-    final double CLAW_HOME = convertDegreeToPercent(0.0,180.0);
-    final double CLAW_EXTENDED = convertDegreeToPercent(120.0,180.0);
+    final double CLAW_HOME = convertDegreeToPercent(180.0,360.0);
+    final double CLAW_EXTENDED = convertDegreeToPercent(360,360.0);
     double clawPosition = CLAW_HOME;
 
+    Servo capper;
+    final double CAPPER_HOME = convertDegreeToPercent(180.0,360.0);
+    final double CAPPER_EXTENDED = convertDegreeToPercent(360,360.0);
+    double capperPosition = CLAW_HOME;
 
-    //Sensors
     GyroSensor gyro;
+
+
+    //Sensors - Left
     ModernRoboticsI2cRangeSensor rangeSensorRightFront;
     ModernRoboticsI2cRangeSensor rangeSensorRightBack;
     ModernRoboticsI2cRangeSensor rangeSensorLeftFront;
     ModernRoboticsI2cRangeSensor rangeSensorLeftBack;
 
-    //ColorSensor colorSensorRight;
-    //ColorSensor colorSensorLeft;
+    //Sensors - Left
+    ModernRoboticsI2cRangeSensor rangeSensorBackRight;
+    ModernRoboticsI2cRangeSensor rangeSensorBackLeft;
+
+    ColorSensor colorSensorLeft;    // 0x3A
+    ColorSensor colorSensorRight;    // 0x3C
+
+
+    float hsvValues[] = {0F,0F,0F};     // hsvValues is an array that will hold the hue, saturation, and value information.
+    final float values[] = hsvValues;   // values is a reference to the hsvValues array.
+
+    boolean bLedOn = true;          // bLedOn represents the state of the LED.
+
+
+
+
 
     //=======================================================
     OpMode opMode;
@@ -69,10 +89,8 @@ public class RobotMecanum// extends Robot
     TensorFlow tensorFlow;
 
     //==============================================================================================   Robot method
-    public RobotMecanum(HardwareMap hMap, OpMode opMode, boolean isAutonimous)
+    public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
-
-
         hardwareMap = hMap;
         this.opMode = opMode;
         //this.opMode = (LinearOpMode) opMode;
@@ -80,7 +98,7 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        telemetry.setAutoClear(true);
+        //telemetry.setAutoClear(false);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -101,39 +119,53 @@ public class RobotMecanum// extends Robot
         //Claw
         claw = hardwareMap.servo.get("claw");
         claw.setDirection(Servo.Direction.REVERSE);
-        //claw.setPosition(CLAW_HOME);
+
+        //capper
+        capper = hardwareMap.servo.get("capper");
+
 
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
         while(gyro.isCalibrating());
 
-        if (isAutonimous)
-        {
+        tensorFlow = new TensorFlow(hardwareMap, opMode);
 
-            tensorFlow = new TensorFlow(hardwareMap, opMode);
+        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
 
-            rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
-            rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
-            rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
-            rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
+        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
+        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
-            rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
-            rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
-            rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-            rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
-        }
+
+        rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
+        rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
+
+        rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
+        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
+
+        // get a reference to our ColorSensor object.
+        //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
+        //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
+        //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
 
     }
+    public void something()
+    {
 
+    }
+    public void initiateVuforia()
+    {
+        tensorFlow.initVuforia();
+    }
     public void printGyroHeading()
     {
         telemetry.addData("Gyro Heading", gyro.getHeading() );
         telemetry.update();
-    }
-    public void initiateVuforia()
-    {
-        tensorFlow.tensorFlow();
     }
     //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
@@ -170,7 +202,7 @@ public class RobotMecanum// extends Robot
         telemetry.addData("frontRightPower", frontRightPower);
         telemetry.addData("backRightPower", backRightPower);
     }
-    public void drive (double distance, double power)
+    public void drive(double distance, double power)
     {
         backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -190,18 +222,17 @@ public class RobotMecanum// extends Robot
 
         moveOmni( power, 0, 0);
 
-
         backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        while (backLeftWheel.isBusy())
+        while (frontRightWheel.isBusy())
         {
             telemetry.addData("encoder-fwdBL", backLeftWheel.getCurrentPosition() + "  busy=" + backLeftWheel.isBusy());
             telemetry.addData("encoder-fwdBR", backRightWheel.getCurrentPosition() + "  busy=" + backRightWheel.isBusy());
-            telemetry.addData("encoder-fwdFL", backLeftWheel.getCurrentPosition() + "  busy=" + frontLeftWheel.isBusy());
-            telemetry.addData("encoder-fwd", backRightWheel.getCurrentPosition() + "  busy=" + frontRightWheel.isBusy());
+            telemetry.addData("encoder-fwdFL", frontLeftWheel.getCurrentPosition() + "  busy=" + frontLeftWheel.isBusy());
+            telemetry.addData("encoder-fwdFR", frontRightWheel.getCurrentPosition() + "  busy=" + frontRightWheel.isBusy());
             telemetry.update();
         }
 
@@ -238,7 +269,7 @@ public class RobotMecanum// extends Robot
      * @param isRightSensor if the robot should use the right sensors
      *
      */
-    public void strafeRange(int distanceFromWall, double power, boolean isRightSensor)
+    public void strafeRange(double distanceFromWall, double power, boolean isRightSensor)
     {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -258,6 +289,30 @@ public class RobotMecanum// extends Robot
                 || (power < 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)){
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+            previousTime = opMode.getRuntime();
+        }
+        moveOmni(0,0,0);
+    }
+    public void driveRange(double distanceFromWall, double power)
+    {
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        gyro.resetZAxisIntegrator();
+
+        previousTime = opMode.getRuntime();
+
+        moveOmni(power, 0, 0);
+
+        // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
+        while((power > 0 && rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH) / 2 < distanceFromWall)
+                ||   (power < 0 && rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH) / 2 > distanceFromWall) )
+        {
+            moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
+            telemetry.addData("distance from wall", rangeSensorBackRight.getDistance(DistanceUnit.INCH));
             telemetry.update();
             previousTime = opMode.getRuntime();
         }
@@ -329,7 +384,22 @@ public class RobotMecanum// extends Robot
             moveOmni(0, 0, 0);
         }
     }
+    public void capper(boolean capperHome)
+    {
+        if (capperHome)
+        {
+            capperPosition = CAPPER_HOME;
+        }
+        else
+        {
+            capperPosition = CAPPER_EXTENDED;
+        }
 
+        capper.setPosition(capperPosition);
+
+        telemetry.addData("Capper Position: ", capper.getPosition());
+        telemetry.update();
+    }
     public void claw(boolean clawHome)
     {
         if (clawHome)
@@ -381,7 +451,7 @@ public class RobotMecanum// extends Robot
         do
         {
             tensorFlow.tensorFlow();
-            shuffle(0.2, 1);
+            //shuffle(0.2, 1);
         }while(tensorFlow.needsShuffle);
 
         if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)

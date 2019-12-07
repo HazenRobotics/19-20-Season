@@ -19,7 +19,7 @@ public class TeleopMecanum extends OpMode
     @Override
     public void init()
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this, false);
+        robotMecanum = new RobotMecanum(hardwareMap, this);
     }
 
 
@@ -27,7 +27,6 @@ public class TeleopMecanum extends OpMode
     @Override
     public void loop()
     {
-        robotMecanum.printGyroHeading();
         telemetry.addData("           Controls", "   ");
         telemetry.addData("Steering", "Gp1: left stick y (axis) = drive");
         telemetry.addData("Steering", "Gp1: left stick x (axis) = strafe");
@@ -37,6 +36,7 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("Lift", "Gp2: left stick y (axis)");
         telemetry.addData("Hooks", "Gp2: y = home");
         telemetry.addData("Hooks", "Gp2: a = extended    \n");
+        robotMecanum.printGyroHeading();
 
         //Claw
         if(gamepad2.b)
@@ -46,6 +46,16 @@ public class TeleopMecanum extends OpMode
         if(gamepad2.x)
         {
             robotMecanum.claw(false);
+        }
+
+        //Claw
+        if(!(gamepad2.right_trigger == 0))
+        {
+            robotMecanum.capper(true);
+        }
+        else
+        {
+            robotMecanum.capper(false);
         }
 
         //Servo Hooks

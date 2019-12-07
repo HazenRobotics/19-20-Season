@@ -24,7 +24,7 @@ public class AutonomousTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this, true);
+        robotMecanum = new RobotMecanum(hardwareMap, this);
 
         robotMecanum.initiateVuforia();
 
@@ -32,8 +32,6 @@ public class AutonomousTest extends LinearOpMode
 
         //==========================================================================================
         //Pre init
-
-
 
         robotMecanum.hooks(true);
         robotMecanum.claw(true);
@@ -47,13 +45,21 @@ public class AutonomousTest extends LinearOpMode
         //Official Start
 
         //step one, move forward to scan blocks
-        robotMecanum.drive(14, 0.75);
+        //robotMecanum.drive(14, 0.75);
 
+        /*
         //scan blocks ands organize information
         robotMecanum.tensorFlowDrive();
 
+        telemetry.addData("Skystone Location", robotMecanum.skystoneLocation);
+        telemetry.update();
+        sleep(5000);
+        */
+
+        /*
         telemetry.addData("running tensorFlowDrive", "");
         telemetry.update();
+
         //tensor flow "drive"
         tensorFlowDrive();
 
@@ -63,18 +69,59 @@ public class AutonomousTest extends LinearOpMode
         //return back to center
         skystoneReturn();
 
+        robotMecanum.strafeRange(14.5, 0.75, true);
 
+        */
 
+        //parking(true, false, 3);
 
-        //robotMecanum.strafeRange(18, 0.75, true);
+/*
+
+        robotMecanum.drive(20, 0.75);
+        robotMecanum.drive(-20, 0.75);
+        */
+
+        //robotMecanum.strafeRange(10, 0.75, true);
+        robotMecanum.capper(false);
+        robotMecanum.capper(true);
+        sleep(2000);
+
+        robotMecanum.driveRange(30, 0.5);
+        robotMecanum.hooks(false);
+        robotMecanum.driveRange(1, -0.5);
+
+        telemetry.addData("step", "finished ");
+        telemetry.update();
+
         //robotMecanum.turnGyro(90,0.2,true);
 
 
     }
 
-
     //==============================================================================================
+    /**
+     *
+     * @param isParkingLeft - parking to the left of robot
+     * @param isParkingFar  - parking far from starting wall
+     * @param sleepTime     - length of time to wait/sleep in SECONDS
+     */
+    public void parking(boolean isParkingLeft, boolean isParkingFar, int sleepTime)
+    {
+        sleep(sleepTime * 1000);
 
+        if(isParkingFar)
+        {
+            robotMecanum.drive(18, 0.75);
+        }
+        if(isParkingLeft)
+        {
+            robotMecanum.strafeRange(65, -0.75, true);
+        }
+        else
+        {
+            robotMecanum.strafeRange(65, 0.75, false);
+        }
+    }
     public void skystoneReturn()
     {
         robotMecanum.strafeRange(74, 0.75, false);
@@ -139,16 +186,19 @@ public class AutonomousTest extends LinearOpMode
         if ( robotMecanum.skystoneLocation.equals("none") )
         {
             telemetry.addData("move to the skystone offscreen", "");
+            telemetry.update();
             skystoneNone();
         }
         else if ( robotMecanum.skystoneLocation.equals("left") )
         {
             telemetry.addData("move to the left skystone position", "");
+            telemetry.update();
             skystoneLeft();
         }
         else if ( robotMecanum.skystoneLocation.equals("right") )
         {
             telemetry.addData("move to the right skystone position", "");
+            telemetry.update();
             skystoneRight();
         }
         else

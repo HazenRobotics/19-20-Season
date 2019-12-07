@@ -83,7 +83,7 @@ public class TensorFlow
         telemetry.addData("TensorFlow", "setting up hardware");
         telemetry.update();
 
-        initVuforia();
+        //initVuforia();
     }
     public void initialModelSetup()
     {
@@ -105,7 +105,10 @@ public class TensorFlow
     //==============================================================================================   tensorFlow
     public void tensorFlow()
     {
-        telemetry.setAutoClear(false);
+        telemetry.addData("tensorFlow started", "");
+        telemetry.update();
+
+        //telemetry.setAutoClear(false);
 
         if(!isSetUp)
         {
@@ -160,7 +163,7 @@ public class TensorFlow
                     }
                     if (updatedRecognitions.size() >= 2 && !skystoneRecognitions.isEmpty() && !stoneRecognitions.isEmpty())
                     {
-                        if (skystoneRecognitions.size() == 0)
+                        if (skystoneRecognitions.size() == 0 || stoneRecognitions.size() >= 2)
                         {
                             noneTally += 1;
                             totalTally += 1;
@@ -185,8 +188,8 @@ public class TensorFlow
 
                         telemetry.update();
                     }
-                    else // if(needsShuffle)
-                        break;
+                   /* else // if(needsShuffle)
+                        break;*/
 
                     //if skystone is detected and left is less than right, position 1
                     //esle if skystone is detected and right is greater than left, position 2
