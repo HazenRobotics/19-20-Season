@@ -52,7 +52,7 @@ public class RobotMecanum// extends Robot
     double clawPosition = CLAW_HOME;
 
     Servo capper;
-    final double CAPPER_HOME = convertDegreeToPercent(180.0,360.0);
+    final double CAPPER_HOME = convertDegreeToPercent(120.0,360.0);
     final double CAPPER_EXTENDED = convertDegreeToPercent(360,360.0);
     double capperPosition = CLAW_HOME;
 
@@ -100,7 +100,7 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        telemetry.setAutoClear(true);
+        telemetry.setAutoClear(false);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -213,10 +213,10 @@ public class RobotMecanum// extends Robot
         backRightWheel.setPower(backRightPower);
 
         //Print Telementary Data for the wheels
-        telemetry.addData("frontLeftPower", frontLeftPower);
+        /*telemetry.addData("frontLeftPower", frontLeftPower);
         telemetry.addData("backLeftPower", backLeftPower);
         telemetry.addData("frontRightPower", frontRightPower);
-        telemetry.addData("backRightPower", backRightPower);
+        telemetry.addData("backRightPower", backRightPower);*/
     }
     public void drive(double distance, double power)
     {
@@ -298,13 +298,20 @@ public class RobotMecanum// extends Robot
 
         moveOmni(0, power, 0);
 
+
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while((power > 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+        while(      (power > 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
                 || (power > 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                || (power < 0 && isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                || (power < 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)){
+                || (power < 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+                || (power < 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall))
+        {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
+
+            telemetry.addData("right positive", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
+            telemetry.addData("left negative", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.addData("right negative", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.addData("left positive", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
             telemetry.update();
             previousTime = opMode.getRuntime();
         }
@@ -462,7 +469,7 @@ public class RobotMecanum// extends Robot
         for(int i = 0; i < 3; i++)
             drive(-distance, power);
     }
-    public void tensorFlowDrive()
+    public void tensorFlowPrep()
     {
         do
         {

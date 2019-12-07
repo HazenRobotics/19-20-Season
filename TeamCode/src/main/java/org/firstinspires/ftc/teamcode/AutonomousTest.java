@@ -44,60 +44,74 @@ public class AutonomousTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
+        robotMecanum.strafeRange(63, -0.75, false);
+        sleep(500000);
+
+        /*
         //step one, move forward to scan blocks
-        //robotMecanum.drive(14, 0.75);
+        driveTime(0.65, 400);
+        robotMecanum.driveRange(14, 0.75);
 
-        /*
+
         //scan blocks ands organize information
-        robotMecanum.tensorFlowDrive();
-
-        telemetry.addData("Skystone Location", robotMecanum.skystoneLocation);
-        telemetry.update();
+        robotMecanum.tensorFlowPrep();
         sleep(5000);
-        */
 
-        /*
-        telemetry.addData("running tensorFlowDrive", "");
-        telemetry.update();
-
-        //tensor flow "drive"
+        //tensor flow driving to blocks
         tensorFlowDrive();
 
-        telemetry.addData("tensorFlowDrive finished", "");
-        telemetry.update();
+         */
 
         //return back to center
-        skystoneReturn();
+        //skystoneReturn();
 
-        robotMecanum.strafeRange(14.5, 0.75, true);
+       // robotMecanum.strafeRange(14.5, 0.75, true);
 
+        /*
         //parking(true, false, 3);
-
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
         */
-        //robotMecanum.strafeRange(16, 0.75, true);
 
-
-
-        driveTime(0.85, 2500);
-
-        //robotMecanum.driveRange(30, 0.75);
-        //robotMecanum.hooks(false);
-        //robotMecanum.driveRange(1, -0.75);
-
-        telemetry.addData("step", "finished ");
-        telemetry.update();
-
-        //robotMecanum.strafeRange(50, 0.75, true);
+        //sideFoundation(false);
 
         //robotMecanum.turnGyro(90,0.2,true);
 
 
     }
+    public void sideFoundation(boolean isRedField)
+    {
 
+        if(isRedField)
+        {
+            robotMecanum.strafeRange(14, 0.75, true);
+
+            driveTime(0.65, 900);
+
+            robotMecanum.driveRange(38, 0.7);
+            robotMecanum.hooks(false);
+            sleep(250);
+            robotMecanum.driveRange(1, -0.75);
+            robotMecanum.hooks(true);
+
+            robotMecanum.strafeRange(55, 0.75, true);
+        }
+        else
+        {
+            robotMecanum.strafeRange(14, -0.75, false);
+
+            driveTime(0.7, 900);
+
+            robotMecanum.driveRange(38, 0.7);
+            robotMecanum.hooks(false);
+            sleep(250);
+            robotMecanum.driveRange(1, -0.75);
+            robotMecanum.hooks(true);
+
+            robotMecanum.strafeRange(55, 0.75, false);
+        }
+    }
     /**
-     *
      * @param power - sets power to wheels - negative power is backwards
      * @param time  - amount of time to run the motors
      */
@@ -126,7 +140,6 @@ public class AutonomousTest extends LinearOpMode
     }
     //==============================================================================================
     /**
-     *
      * @param isParkingLeft - parking to the left of robot
      * @param isParkingFar  - parking far from starting wall
      * @param sleepTime     - length of time to wait/sleep in SECONDS
