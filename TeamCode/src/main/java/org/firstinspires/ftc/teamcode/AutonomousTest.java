@@ -44,8 +44,10 @@ public class AutonomousTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        robotMecanum.strafeRange(63, -0.75, false);
-        sleep(500000);
+        //robotMecanum.strafeRange(35, 0.75, false);
+        //sleep(500000);
+        robotMecanum.driveTime(0.7, 500);
+        robotMecanum.strafeTime(-0.75, 2000);
 
         /*
         //step one, move forward to scan blocks
@@ -73,70 +75,55 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(-20, 0.75);
         */
 
-        //sideFoundation(false);
+        /*
+        sideFoundation(true, 20000, 3000, 3000, 3000);
 
+        sideFoundation(true, 20000, 4000, 4000, 4000);
+
+        sideFoundation(true, 20000, 5000, 5000, 5000);
+*/
         //robotMecanum.turnGyro(90,0.2,true);
 
 
     }
-    public void sideFoundation(boolean isRedField)
+    public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
     {
 
         if(isRedField)
         {
-            robotMecanum.strafeRange(14, 0.75, true);
+            robotMecanum.strafeRange(16, 0.75, true);
 
-            driveTime(0.65, 900);
+            //driveTime(0.65, 900);
 
-            robotMecanum.driveRange(38, 0.7);
+            robotMecanum.driveTime(0.75, drive1Time);
+            //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.driveRange(1, -0.75);
+            robotMecanum.driveTime(-0.75, drive2Time);
+            //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.strafeRange(55, 0.75, true);
+            robotMecanum.strafeTime(0.75, strafe2Time);
+            //robotMecanum.strafeRange(55, 0.75, true);
         }
         else
         {
-            robotMecanum.strafeRange(14, -0.75, false);
+            robotMecanum.strafeRange(16, -0.75, false);
 
-            driveTime(0.7, 900);
+            //driveTime(0.65, 900);
 
-            robotMecanum.driveRange(38, 0.7);
+            robotMecanum.driveTime(0.75, drive1Time);
+            //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.driveRange(1, -0.75);
+            robotMecanum.driveTime(-0.75, drive2Time);
+            //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.strafeRange(55, 0.75, false);
+            robotMecanum.strafeTime(0.75, strafe2Time);
+            //robotMecanum.strafeRange(55, 0.75, false);
         }
-    }
-    /**
-     * @param power - sets power to wheels - negative power is backwards
-     * @param time  - amount of time to run the motors
-     */
-    public void driveTime(double power, long time)
-    {
-        //set power to 'drive' motors
-        robotMecanum.moveOmni(power, 0, 0);
-
-        telemetry.addData("move", "finished ");
-        telemetry.update();
-
-        //wait for certain amount of time while motors are running
-        //robotMecanum.wait(time);
-        long setTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - setTime < (time));
-
-
-        telemetry.addData("timer", "finished ");
-        telemetry.update();
-
-        //sets all power to zero afterwords
-        robotMecanum.moveOmni(0, 0, 0);
-
-        telemetry.addData("set power 0", "finished ");
-        telemetry.update();
+        sleep(waitTime);
     }
     //==============================================================================================
     /**
