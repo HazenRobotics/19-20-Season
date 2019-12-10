@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class TeleopMecanum extends OpMode
 {
     DcMotor lift;
-    final double MAX_LIFT_SPEED = 0.8;
+    final double MAX_LIFT_SPEED = 1;
 
     RobotMecanum robotMecanum;
 

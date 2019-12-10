@@ -93,6 +93,7 @@ public class RobotMecanum// extends Robot
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode)
     {
+
         hardwareMap = hMap;
         this.opMode = opMode;
         //this.opMode = (LinearOpMode) opMode;
