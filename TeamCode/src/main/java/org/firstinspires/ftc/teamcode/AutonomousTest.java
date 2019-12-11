@@ -46,9 +46,9 @@ public class AutonomousTest extends LinearOpMode
 
         //robotMecanum.strafeRange(35, 0.75, false);
         //sleep(500000);
-        robotMecanum.driveTime(0.7, 500);
-        robotMecanum.strafeTime(-0.75, 2000);
-
+        //robotMecanum.driveTime(0.7, 500);
+        //robotMecanum.strafeTime(-0.75, 2000);
+        robotMecanum.strafeRange(50, 0.75, false);
         /*
         //step one, move forward to scan blocks
         driveTime(0.65, 400);

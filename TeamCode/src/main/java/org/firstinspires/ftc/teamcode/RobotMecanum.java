@@ -28,8 +28,11 @@ public class RobotMecanum// extends Robot
     final double WHEEL_DIAMETER = 4;
     final int GEAR_RATIO = 2;
 
+    final double BACK_SENSOR_SEPERATION = 25/32;
+
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
+    final int TICKS_PER_BLOCK = 1;
 
     //Define Wheel Motors
     DcMotor frontLeftWheel;
@@ -177,6 +180,8 @@ public class RobotMecanum// extends Robot
     public void driveTime(double power, long time)
     {
         //set power to 'drive' motors
+
+        //
         moveOmni(power, 0, 0);
 
         //wait for certain amount of time while motors are running
@@ -326,12 +331,12 @@ public class RobotMecanum// extends Robot
 
         previousTime = opMode.getRuntime();
 
-        moveOmni(0, power, 0);
+        //moveOmni(0, power, 0);
 
 
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while(     (power > 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
-                || (power < 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)      )
+        while(     (power > 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+                || (power < 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)      )
         {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
@@ -344,14 +349,16 @@ public class RobotMecanum// extends Robot
             previousTime = opMode.getRuntime();
         }
 
-        telemetry.addData("away", (power > 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                || (power < 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall) );
+        telemetry.addData("away", (power > 0  && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+                                             || (power < 0  && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall) );
         telemetry.update();
 
-        while((power > 0 && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                || (power < 0 && isRightSensor && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
+        //moving towards a wall
+        while((power > 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+           || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
         {
-            moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime));
+            moveOmni(180, power, 0);//gyroPID(180, opMode.getRuntime() - previousTime));
+            //moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime) );
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
 
             telemetry.addData("right positive", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
@@ -411,9 +418,16 @@ public class RobotMecanum// extends Robot
         telemetry.update();
         return P * error + I * this.integral + D * derivative;
     }
-    public double rangePID(int targetDistanceDifference,double range1Reading,double range2Reading  , double time)
+
+    /**
+     * @param targetAngleFromWall   - angle from the wall - 0 is parallel
+     * @param range1Reading         - the distance from back left sensor to the wall    doesn't matter which you put in, left or right sensor
+     * @param range2Reading         - the distance from back right sensor to the wall                           ||
+     * @param time                  - current time  -  usually (opMode.getRuntime() - previousTime)
+     */
+    public double rangePID(int targetAngleFromWall, double range1Reading, double range2Reading, double time)
     {
-        double error = targetDistanceDifference - Math.abs(range1Reading-range2Reading); // Error = Target - Actual
+        double error = targetAngleFromWall - Math.atan( (Math.abs(range1Reading-range2Reading))/BACK_SENSOR_SEPERATION ); // Error = Target - Actual
         this.integral += (error * time); // Integral is increased by the error*time
         double derivative = (error - this.previous_error) / time;
         telemetry.addData("PID correction value:", P * error);
@@ -541,6 +555,28 @@ public class RobotMecanum// extends Robot
         else
             telemetry.addData("Error: ", "No Move");
         telemetry.update();
+    }
+
+    /**
+     * Runs the lift to a certain position specified
+     * by how many blocks high the lift needs to go
+     *
+     * @param numBlocks how many blocks to move up
+     * @param power power at which to run the lift
+     */
+    public void setLiftPosition(int numBlocks, double power){
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift.setTargetPosition(numBlocks * TICKS_PER_BLOCK);
+
+        lift.setPower(power);
+
+        while(lift.isBusy());
+
+        lift.setPower(0);
+
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 }
