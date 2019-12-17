@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -94,9 +95,8 @@ public class RobotMecanum// extends Robot
     TensorFlow tensorFlow;
 
     //==============================================================================================   Robot method
-    public RobotMecanum(HardwareMap hMap, OpMode opMode)
+    public RobotMecanum(HardwareMap hMap, OpMode opMode, boolean isTeleOP)
     {
-
         hardwareMap = hMap;
         this.opMode = opMode;
         //this.opMode = (LinearOpMode) opMode;
@@ -104,7 +104,7 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        //telemetry.setAutoClear(false);
+        telemetry.setAutoClear(false);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -129,35 +129,45 @@ public class RobotMecanum// extends Robot
         //capper
         capper = hardwareMap.servo.get("capper");
 
+        if(!isTeleOP)
+            {
+            gyro = hardwareMap.gyroSensor.get("gyro");
+            gyro.calibrate();
+            while(gyro.isCalibrating());
 
-        gyro = hardwareMap.gyroSensor.get("gyro");
-        gyro.calibrate();
-        while(gyro.isCalibrating());
+            tensorFlow = new TensorFlow(hardwareMap, opMode);
 
-        tensorFlow = new TensorFlow(hardwareMap, opMode);
+            rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+            rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+            rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+            rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
 
-        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
-        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
-        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
-        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+            rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+            rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
+            rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
+            rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
-        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
-        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
-        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
+            rangeSensorRightFront.initialize();
+            rangeSensorRightBack.initialize();
+            rangeSensorLeftFront.initialize();
+            rangeSensorLeftBack.initialize();
 
 
+            rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
+            rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
 
-        rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
-        rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
+            rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
+            rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
 
-        rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
-        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
+            rangeSensorBackLeft.initialize();
+            rangeSensorBackRight.initialize();
 
-        // get a reference to our ColorSensor object.
-        //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
-        //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
-        //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
+
+            // get a reference to our ColorSensor object.
+            //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
+            //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
+            //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
+        }
 
     }
     public void strafeTime(double power, long time)
@@ -168,8 +178,13 @@ public class RobotMecanum// extends Robot
         //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
         long setTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - setTime < (time));
+        previousTime = opMode.getRuntime();
 
+        while(System.currentTimeMillis() - setTime < (time))
+        {
+            moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
+            previousTime = opMode.getRuntime();
+        }
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
     }
@@ -187,7 +202,7 @@ public class RobotMecanum// extends Robot
         //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
         long setTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - setTime < (time));
+        while(((LinearOpMode) opMode).opModeIsActive() && System.currentTimeMillis() - setTime < (time));
 
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
@@ -255,44 +270,179 @@ public class RobotMecanum// extends Robot
     }
     public void drive(double distance, double power)
     {
-        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-
+        setEncoders(distance);
         moveOmni( power, 0, 0);
+        runEncoders(true,power);
 
+    }
+
+    public void strafe(double distance, double power)
+    {
+        setEncoders(distance);
+        moveOmni( 0, power, 0);
+        runEncoders(false,power);
+    }
+
+    private void setEncoders( double distance)
+    {
+        try
+        {
+            backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        catch(NullPointerException e)
+        {
+            telemetry.addData("Error" , "Cannot set \"RUN_USING_ENCODER\", check your mapping");
+            telemetry.update();
+        }
+
+        try
+        {
+            backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
+        catch(Exception e)
+        {
+            telemetry.addData("Error" , "Cannot set \"STOP_AND_RESET_ENCODER\", check your mapping");
+            telemetry.update();
+        }
+        setEncoderPos(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+
+    }
+
+    private boolean setEncoderPos(double distance)
+    {
+
+        boolean success = true;             // Tells whether setting encoders is successful or not
+
+        /*
+            The encoder counts needed for each wheel.
+            When mecanum wheels move in an off-direction (angle not a multiple of 45),
+            each wheel moves at a different speed. That's why we need separate variables.
+         */
+        int frontLeftEncoder;
+        int backLeftEncoder;
+        int frontRightEncoder;
+        int backRightEncoder;
+
+        double avgMotion;               // Average speed of the motors
+        int avgCounts;                  // Average number of encoder counts to use
+
+        try
+        {
+            /*
+                With 45 degree rollers, the strafe distance on Mecanum wheels is the same
+                as normal forward and backward distance(theoretically). Because the wheels move at
+                different speeds, I opted to average them to find correct distance.
+             */
+            avgMotion = Math.abs((frontLeftWheel.getPower()) + Math.abs(backLeftWheel.getPower()) +
+                    Math.abs(frontRightWheel.getPower()) + Math.abs(backRightWheel.getPower())) / 4;
+
+
+            // Calculate the average number of counts for the motors.
+            avgCounts = (int)(distance / (WHEEL_DIAMETER*Math.PI)* TICK_PER_REVOLUTION);
+
+
+            // Set the individual counts.
+            frontLeftEncoder = (int)(avgCounts * frontLeftWheel.getPower() / avgMotion);
+            backLeftEncoder = (int)(avgCounts * backLeftWheel.getPower() / avgMotion);
+            frontRightEncoder = (int)(avgCounts * frontRightWheel.getPower() / avgMotion);
+            backRightEncoder = (int)(avgCounts * backRightWheel.getPower() / avgMotion);
+
+            // Set the encoder values to the motors
+            frontLeftWheel.setTargetPosition(frontLeftEncoder);
+            backLeftWheel.setTargetPosition(backLeftEncoder);
+            frontRightWheel.setTargetPosition(frontRightEncoder);
+            backRightWheel.setTargetPosition(backRightEncoder);
+        }
+        catch(NullPointerException e)
+        {
+            telemetry.addData("Error" , "Cannot set encoder target positions, check your mapping");
+            success = false;
+        }
+
+        return success;
+    }
+
+    /*boolean driveTo(final double distance , final double heading , final double speed)
+    {
+        // Create a new point to facilitate with cartesian/polar conversions
+        UtilPoint myPoint = new UtilPoint(speed , heading , UtilPoint.Type.POLAR);
+
+        boolean keepDriving = true;         // Determines whether or not to keep driving
+        boolean success = true;             // Determines whether driving was successful or not
+
+
+        setEncoders(distance);
+        setEncoderPos(distance);
+
+        // While any of the motors are doing things, keep setting power
+        while(keepDriving)
+        {
+            if(Math.abs(frontLeftWheel.getCurrentPosition()) >= Math.abs(frontLeftWheel.getTargetPosition()) &&
+                    Math.abs(backLeftWheel.getCurrentPosition()) >= Math.abs(backLeftWheel.getTargetPosition()) &&
+                    Math.abs(frontRightWheel.getCurrentPosition()) >= Math.abs(frontRightWheel.getTargetPosition()) &&
+                    Math.abs(backRightWheel.getCurrentPosition()) >= Math.abs(backRightWheel.getTargetPosition()))
+                keepDriving = false;
+
+            try
+            {
+                moveOmni(myPoint.y(),myPoint.x(),0);
+            }
+            catch(Exception e)
+            {
+                telemetry.addData("Error" , "Cannot power drivetrain, check your mapping");
+                telemetry.update();
+                success = false;
+            }
+        }
+
+        return success;
+    }*/
+
+
+    private void runEncoders(boolean isDrive, double power)
+    {
         backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        while (frontRightWheel.isBusy())
+        boolean keepDriving = true;         // Determines whether or not to keep driving
+        boolean success = true;             // Determines whether driving was successful or not
+        previousTime = opMode.getRuntime();
+        // While any of the motors are doing things, keep setting power
+        while(keepDriving)
         {
-            telemetry.addData("encoder-fwdBL", backLeftWheel.getCurrentPosition() + "  busy=" + backLeftWheel.isBusy());
-            telemetry.addData("encoder-fwdBR", backRightWheel.getCurrentPosition() + "  busy=" + backRightWheel.isBusy());
-            telemetry.addData("encoder-fwdFL", frontLeftWheel.getCurrentPosition() + "  busy=" + frontLeftWheel.isBusy());
-            telemetry.addData("encoder-fwdFR", frontRightWheel.getCurrentPosition() + "  busy=" + frontRightWheel.isBusy());
-            telemetry.update();
+            if(Math.abs(frontLeftWheel.getCurrentPosition()) >= Math.abs(frontLeftWheel.getTargetPosition()) &&
+                    Math.abs(backLeftWheel.getCurrentPosition()) >= Math.abs(backLeftWheel.getTargetPosition()) &&
+                    Math.abs(frontRightWheel.getCurrentPosition()) >= Math.abs(frontRightWheel.getTargetPosition()) &&
+                    Math.abs(backRightWheel.getCurrentPosition()) >= Math.abs(backRightWheel.getTargetPosition()))
+                keepDriving = false;
+
+            try
+            {
+                if(isDrive)
+                    moveOmni(power,0,gyroPID(180, opMode.getRuntime() - previousTime));
+                else
+                    moveOmni(0,power,gyroPID(180, opMode.getRuntime() - previousTime));
+                previousTime = opMode.getRuntime();
+            }
+            catch(Exception e)
+            {
+                telemetry.addData("Error" , "Cannot power drivetrain, check your mapping");
+                telemetry.update();
+                success = false;
+            }
         }
 
         // set motor power to zero to turn off motors. The motors stop on their own but
         // power is still applied so we turn off the power.
-        backRightWheel.setPower(0.0);
-        backLeftWheel.setPower(0.0);
-        frontRightWheel.setPower(0.0);
-        frontLeftWheel.setPower(0.0);
+        moveOmni(0,0,0);
 
 
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -300,15 +450,6 @@ public class RobotMecanum// extends Robot
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public void strafe(double distance, double power)
-    {
-        frontLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backLeftWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        frontRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        backRightWheel.setTargetPosition(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
-        moveOmni( 0, power, 0);
-    }
-
     /**
      * + power and isRightSensor moves towards right wall
      * <br>- power and isRightSensor moves away from right wall
@@ -333,7 +474,6 @@ public class RobotMecanum// extends Robot
 
         //moveOmni(0, power, 0);
 
-
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
         while(     (power > 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
                 || (power < 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)      )
@@ -357,16 +497,74 @@ public class RobotMecanum// extends Robot
         while((power > 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
            || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
         {
-            moveOmni(180, power, 0);//gyroPID(180, opMode.getRuntime() - previousTime));
-            //moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime) );
+            moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime) );
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
 
             telemetry.addData("right positive", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
             telemetry.addData("left negative", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
-            telemetry.addData("right negative", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 );
-            telemetry.addData("left positive", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
             telemetry.update();
             previousTime = opMode.getRuntime();
+        }
+        moveOmni(0,0,0);
+    }
+
+
+    /**
+     * Strafes toward a wall using ultrasonic sensors
+     * @param power power at which to strafe toward wall
+     * @param distanceFromWall distance at which to move to relative to the wall
+     * @param usingRightSensors if the right sensors should be used
+     */
+    public void strafeTowardWall(double power, int distanceFromWall, boolean usingRightSensors){
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        gyro.resetZAxisIntegrator();
+
+        previousTime = opMode.getRuntime();
+
+        power = usingRightSensors? power : -power;
+        moveOmni(0, power, 0);
+
+        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+        || (!usingRightSensors && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)) {
+            moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
+            previousTime = opMode.getRuntime();
+            telemetry.addData("rightT", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
+            telemetry.addData("leftT", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.update();
+        }
+        moveOmni(0,0,0);
+    }
+
+    /**
+     * Strafes away from a wall using ultrasonic sensors
+     * @param power power at which to strafe away from wall
+     * @param distanceFromWall distance at which to move to relative to the wall
+     * @param usingRightSensors if the right sensors should be used
+     */
+    public void strafeAwayFromWall(double power, int distanceFromWall, boolean usingRightSensors){
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        gyro.resetZAxisIntegrator();
+
+        previousTime = opMode.getRuntime();
+
+        power = usingRightSensors? -power : power;
+        moveOmni(0, power, 0);
+
+        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && rangeSensorRightFront.getDistance(DistanceUnit.INCH) < distanceFromWall)
+                || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall)) {
+            moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
+            previousTime = opMode.getRuntime();
+            telemetry.addData("rightA", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
+            telemetry.addData("leftA", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.update();
         }
         moveOmni(0,0,0);
     }
@@ -414,7 +612,7 @@ public class RobotMecanum// extends Robot
         int error = targetAngle - getNewGyroHeading(); // Error = Target - Actual
         this.integral += (error * time); // Integral is increased by the error*time
         double derivative = (error - this.previous_error) / time;
-        telemetry.addData("PID correction value:", P * error);
+        telemetry.addData("PID correction value:", P * error + I*this.integral);
         telemetry.update();
         return P * error + I * this.integral + D * derivative;
     }

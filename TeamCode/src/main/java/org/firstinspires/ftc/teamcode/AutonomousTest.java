@@ -24,7 +24,7 @@ public class AutonomousTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this);
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
         //robotMecanum.initiateVuforia();
 
@@ -44,15 +44,35 @@ public class AutonomousTest extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        //robotMecanum.strafeRange(35, 0.75, false);
-        //sleep(500000);
-        //robotMecanum.driveTime(0.7, 500);
-        //robotMecanum.strafeTime(-0.75, 2000);
-        robotMecanum.strafeRange(50, 0.75, false);
+        //robotMecanum.strafeTowardWall(0.75,16,false);
+        telemetry.setAutoClear(false);
+        //robotMecanum.strafe(-10,0.75);
+        //robotMecanum.drive(-10,0.75);
+        //robotMecanum.strafeAwayFromWall(0.75, 40, false);
+
+        //robotMecanum.strafeTime(0.75,2000);
+        //robotMecanum.strafeTowardWall(0.75,16,true);
+        //robotMecanum.strafeAwayFromWall(0.75,50,false);
+        int times = 2;
+        for(int i = 0; i < times; i++)
+        {
+            sleep(10 * 1000);
+            robotMecanum.strafeRange(50, 0.75, false);
+
+            sleep(10 * 1000);
+            robotMecanum.strafeRange(50, -0.75, true);
+
+        }
+
+
         /*
         //step one, move forward to scan blocks
         driveTime(0.65, 400);
         robotMecanum.driveRange(14, 0.75);
+
+
+
+
 
 
         //scan blocks ands organize information
@@ -91,7 +111,7 @@ public class AutonomousTest extends LinearOpMode
 
         if(isRedField)
         {
-            robotMecanum.strafeRange(16, 0.75, true);
+            //robotMecanum.strafeRange(16, 0.75, true);
 
             //driveTime(0.65, 900);
 
@@ -108,7 +128,7 @@ public class AutonomousTest extends LinearOpMode
         }
         else
         {
-            robotMecanum.strafeRange(16, -0.75, false);
+            //robotMecanum.strafeRange(16, -0.75, false);
 
             //driveTime(0.65, 900);
 
@@ -141,22 +161,22 @@ public class AutonomousTest extends LinearOpMode
         }
         if(isParkingLeft)
         {
-            robotMecanum.strafeRange(65, -0.75, true);
+            //robotMecanum.strafeRange(65, -0.75, true);
         }
         else
         {
-            robotMecanum.strafeRange(65, 0.75, false);
+            //robotMecanum.strafeRange(65, 0.75, false);
         }
     }
     public void skystoneReturn()
     {
-        robotMecanum.strafeRange(74, 0.75, false);
+        //robotMecanum.strafeRange(74, 0.75, false);
     }
 
     public void skystoneNone()
     {
         //strafe over to block
-        robotMecanum.strafeRange(14, -0.75, false);
+        //robotMecanum.strafeRange(14, -0.75, false);
 
         //drive forward to pickup block
         robotMecanum.drive(12, 0.75);
@@ -174,7 +194,7 @@ public class AutonomousTest extends LinearOpMode
     public void skystoneLeft()
     {
         //strafe over to block
-        robotMecanum.strafeRange(22, -0.75, false);
+        //robotMecanum.strafeRange(22, -0.75, false);
 
         //drive forward to pickup block
         robotMecanum.drive(12, 0.75);
@@ -192,7 +212,7 @@ public class AutonomousTest extends LinearOpMode
     public void skystoneRight()
     {
         //strafe over to block
-        robotMecanum.strafeRange(30, -0.75, false);
+        //robotMecanum.strafeRange(30, -0.75, false);
 
         //drive forward to pickup block
         robotMecanum.drive(12, 0.75);

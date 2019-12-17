@@ -28,45 +28,158 @@ import java.util.ArrayList;
 //@disabled
 public class AutonomousTensorFlowTest extends LinearOpMode
 {
+    RobotMecanum robotMecanum;
+
     @Override
     public void runOpMode() throws InterruptedException
     {
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
+
+        //robotMecanum.initiateVuforia();
+
+        robotMecanum.gyro.calibrate();
+
         //==========================================================================================
         //Pre init
 
-        Robot robot = new Robot(hardwareMap, this);
-        TensorFlow tensorFlow = new TensorFlow(hardwareMap, this);
+        robotMecanum.hooks(true);
+        robotMecanum.claw(true);
 
-        telemetry.addData("init", "finished");
+        telemetry.addData("Step 1", "init finished");
         telemetry.update();
 
-        tensorFlow.initVuforia();
-
         waitForStart();
-
-        robot.hooks(true);
-        robot.clapper(true);
-        telemetry.addData("hooks and clapper", "home");
-        sleep(100);
 
         //==========================================================================================
         //Official Start
 
-        /*
-        robot.turnOnSpot(90,1, true);
-        sleep(250);
-        */
+        telemetry.setAutoClear(false);
+        //step one, move forward to scan blocks
+        robotMecanum.driveRange(14, 0.75);
 
 
-        robot.move(18, 1.0, true);
-        telemetry.addData("moved", "forward");
-        telemetry.update();
+        //scan blocks ands organize information
+        robotMecanum.tensorFlowPrep();
         sleep(5000);
-        //robot.turnOnSpot(45,0.75, false);
 
-        robot.tensorFlowDrive();
+        //tensor flow driving to blocks
+        tensorFlowDrive();
+
+
+
+        //return back to center
+        skystoneReturn();
+
 
 
     }
+    //==============================================================================================
+    /**
+     * @param isParkingLeft - parking to the left of robot
+     * @param isParkingFar  - parking far from starting wall
+     * @param sleepTime     - length of time to wait/sleep in SECONDS
+     */
+    public void parking(boolean isParkingLeft, boolean isParkingFar, int sleepTime)
+    {
+        sleep(sleepTime * 1000);
+
+        if(isParkingFar)
+        {
+            robotMecanum.drive(18, 0.75);
+        }
+        if(isParkingLeft)
+        {
+            //robotMecanum.strafeRange(65, -0.75, true);
+        }
+        else
+        {
+            //robotMecanum.strafeRange(65, 0.75, false);
+        }
+    }
+    public void skystoneReturn()
+    {
+        //robotMecanum.strafeRange(74, 0.75, false);
+    }
+
+    public void skystoneNone()
+    {
+        //strafe over to block
+        //robotMecanum.strafeRange(14, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void skystoneLeft()
+    {
+        //strafe over to block
+        //robotMecanum.strafeRange(22, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void skystoneRight()
+    {
+        //strafe over to block
+        //robotMecanum.strafeRange(30, -0.75, false);
+
+        //drive forward to pickup block
+        robotMecanum.drive(12, 0.75);
+
+        //pickup block
+        robotMecanum.claw(true);
+
+        //drive backward
+        robotMecanum.drive(-12, 0.75);
+
+        telemetry.addData("skystoneNone", "completed");
+        telemetry.update();
+    }
+
+    public void tensorFlowDrive()
+    {
+        if ( robotMecanum.skystoneLocation.equals("none") )
+        {
+            telemetry.addData("move to the skystone offscreen", "");
+            telemetry.update();
+            skystoneNone();
+        }
+        else if ( robotMecanum.skystoneLocation.equals("left") )
+        {
+            telemetry.addData("move to the left skystone position", "");
+            telemetry.update();
+            skystoneLeft();
+        }
+        else if ( robotMecanum.skystoneLocation.equals("right") )
+        {
+            telemetry.addData("move to the right skystone position", "");
+            telemetry.update();
+            skystoneRight();
+        }
+        else
+            telemetry.addData("Error: ", "No Move");
+        telemetry.update();
+    }
+
+
 }
 

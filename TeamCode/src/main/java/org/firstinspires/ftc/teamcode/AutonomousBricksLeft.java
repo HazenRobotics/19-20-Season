@@ -24,7 +24,7 @@ public class AutonomousBricksLeft extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this);
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
         //robotMecanum.initiateVuforia();
 
@@ -43,7 +43,6 @@ public class AutonomousBricksLeft extends LinearOpMode
 
         //==========================================================================================
         //Official Start
-
 
         //drive forward
         robotMecanum.driveTime(0.7, 1000);
