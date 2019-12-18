@@ -42,8 +42,15 @@ public class AutonomousTest extends LinearOpMode
         waitForStart();
 
         //==========================================================================================
-        //Official Start
+        //Official
 
+
+        while(opModeIsActive())
+        {
+            robotMecanum.testSensors();
+        }
+
+/*
         //robotMecanum.strafeTowardWall(0.75,16,false);
         telemetry.setAutoClear(false);
         //robotMecanum.strafe(-10,0.75);
@@ -62,7 +69,7 @@ public class AutonomousTest extends LinearOpMode
             sleep(10 * 1000);
             robotMecanum.strafeRange(50, -0.75, true);
 
-        }
+        }*/
 
 
         /*

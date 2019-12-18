@@ -15,9 +15,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 // backs up to the starting point using encoders to measure the distance.
 // This example assumes there is one encoder, attached to the left motor
 
-@Autonomous(name="Autonomous-BricksLeft")
+@Autonomous(name="Autonomous-BricksBlue")
 //@disabled
-public class AutonomousBricksLeft extends LinearOpMode
+public class AutonomousBricksBlue extends LinearOpMode
 {
     RobotMecanum robotMecanum;
 
@@ -44,40 +44,19 @@ public class AutonomousBricksLeft extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        //drive forward
-        robotMecanum.driveTime(0.7, 1000);
-        sleep(500);
-        //claw down/extended
-        robotMecanum.claw(false);
+        //move forward to grab foundation
+        robotMecanum.driveRange(36,0.65);
 
-        //drive back slightly
-        robotMecanum.driveTime(-0.75, 500);
-
-        //strafe right to wall
-        robotMecanum.strafeTime(0.75, 3600);
-
-        //claw up/home
+        //grab foundation
         robotMecanum.claw(true);
 
-        //strafe left ot other side
-        robotMecanum.strafeTime(-0.75, 3600);
-
-        //forward
-        robotMecanum.driveTime(0.75, 500);
-
-        //grab block
-        robotMecanum.claw(true);
-
-        //back small amount
-        robotMecanum.driveTime(-0.75, 500);
-
-        //strafe
-        robotMecanum.strafeTime(-0.75, 4000);
+        //return to wall
+        robotMecanum.driveTime(0.75, 1000);
 
         //drop
         robotMecanum.claw(false);
 
-
+        robotMecanum.strafeRange(65, -0.75, true);
 
     }
     public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)

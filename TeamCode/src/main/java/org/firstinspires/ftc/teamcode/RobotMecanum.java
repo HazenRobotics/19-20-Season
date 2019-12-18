@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class RobotMecanum// extends Robot
+public class RobotMecanum// extends LinearOpMode  //Robot
 {
     long setTime = System.currentTimeMillis();
     boolean  hasRun = false;
@@ -82,10 +82,6 @@ public class RobotMecanum// extends Robot
 
     boolean bLedOn = true;          // bLedOn represents the state of the LED.
 
-
-
-
-
     //=======================================================
     OpMode opMode;
     HardwareMap hardwareMap;
@@ -104,7 +100,7 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        telemetry.setAutoClear(false);
+        telemetry.setAutoClear(true);
 
         lift = hardwareMap.dcMotor.get("lift");
 
@@ -130,10 +126,10 @@ public class RobotMecanum// extends Robot
         capper = hardwareMap.servo.get("capper");
 
         if(!isTeleOP)
-            {
+        {
             gyro = hardwareMap.gyroSensor.get("gyro");
             gyro.calibrate();
-            while(gyro.isCalibrating());
+            while (gyro.isCalibrating()) ;
 
             tensorFlow = new TensorFlow(hardwareMap, opMode);
 
@@ -168,14 +164,28 @@ public class RobotMecanum// extends Robot
             //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
             //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
         }
-
     }
+
+    public void testSensors()
+    {
+        telemetry.addData("Right Sensors",(rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 );
+        telemetry.addData("Left Sensors",(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+        telemetry.addData("Back Sensors",(rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 );
+        telemetry.addData("Gyro Sensor", gyro.getHeading());
+        telemetry.addData("New Gyro Sensor", getNewGyroHeading() );
+
+        telemetry.update();
+    }
+
+    /**
+     * @param power power for the wheels
+     * @param time time to drive in MILLISECONDS
+     */
     public void strafeTime(double power, long time)
     {
         //set power to 'drive' motors
         moveOmni(0, power, 0);
-
-        //wait for certain amount of time while motors are running
+        //wait for certain of time while motors are running
         //robotMecanum.wait(time);
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
@@ -190,20 +200,24 @@ public class RobotMecanum// extends Robot
     }
     /**
      * @param power - sets power to wheels - negative power is backwards
-     * @param time  - amount of time to run the motors
+     * @param time  - amount of time to run the motors in MILLISECONDS
      */
     public void driveTime(double power, long time)
     {
         //set power to 'drive' motors
 
-        //
         moveOmni(power, 0, 0);
 
         //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
         long setTime = System.currentTimeMillis();
-        while(((LinearOpMode) opMode).opModeIsActive() && System.currentTimeMillis() - setTime < (time));
+        previousTime = opMode.getRuntime();
 
+        while(System.currentTimeMillis() - setTime < (time))
+        {
+            moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
+            previousTime = opMode.getRuntime();
+        }
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
     }
@@ -545,7 +559,8 @@ public class RobotMecanum// extends Robot
      * @param distanceFromWall distance at which to move to relative to the wall
      * @param usingRightSensors if the right sensors should be used
      */
-    public void strafeAwayFromWall(double power, int distanceFromWall, boolean usingRightSensors){
+    public void strafeAwayFromWall(double power, int distanceFromWall, boolean usingRightSensors)
+    {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -558,8 +573,9 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? -power : power;
         moveOmni(0, power, 0);
 
-        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && rangeSensorRightFront.getDistance(DistanceUnit.INCH) < distanceFromWall)
-                || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall)) {
+        while((usingRightSensors && rangeSensorRightFront.getDistance(DistanceUnit.INCH) < distanceFromWall)
+          || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall))
+            {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             previousTime = opMode.getRuntime();
             telemetry.addData("rightA", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
@@ -569,7 +585,7 @@ public class RobotMecanum// extends Robot
         moveOmni(0,0,0);
     }
     public void driveRange(double distanceFromWall, double power)
-    {
+        {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -582,8 +598,8 @@ public class RobotMecanum// extends Robot
         moveOmni(power, 0, 0);
 
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while((power > 0 && rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH) / 2 < distanceFromWall)
-                ||   (power < 0 && rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH) / 2 > distanceFromWall) )
+        while((power > 0 && (rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+         ||   (power < 0 && (rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall) )
         {
             moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", rangeSensorBackRight.getDistance(DistanceUnit.INCH));
