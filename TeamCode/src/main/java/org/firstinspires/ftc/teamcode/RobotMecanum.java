@@ -641,7 +641,11 @@ public class RobotMecanum// extends Robot
 
         lift.setPower(power);
 
-        while(lift.isBusy());
+        while(lift.isBusy()){
+            telemetry.addData("Target Lift Position", lift.getTargetPosition());
+            telemetry.addData("Lift Position", lift.getCurrentPosition());
+            telemetry.update();
+        }
 
         lift.setPower(0);
 
