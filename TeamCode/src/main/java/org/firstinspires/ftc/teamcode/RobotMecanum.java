@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class RobotMecanum// extends LinearOpMode  //Robot
+public class RobotMecanum// extends Robot
 {
     long setTime = System.currentTimeMillis();
     boolean  hasRun = false;
@@ -185,7 +185,8 @@ public class RobotMecanum// extends LinearOpMode  //Robot
     {
         //set power to 'drive' motors
         moveOmni(0, power, 0);
-        //wait for certain of time while motors are running
+
+        //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
@@ -529,7 +530,8 @@ public class RobotMecanum// extends LinearOpMode  //Robot
      * @param distanceFromWall distance at which to move to relative to the wall
      * @param usingRightSensors if the right sensors should be used
      */
-    public void strafeTowardWall(double power, int distanceFromWall, boolean usingRightSensors){
+    public void strafeTowardWall(double power, int distanceFromWall, boolean usingRightSensors)
+    {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -577,7 +579,6 @@ public class RobotMecanum// extends LinearOpMode  //Robot
           || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall))
             {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
-            previousTime = opMode.getRuntime();
             telemetry.addData("rightA", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
             telemetry.addData("leftA", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
             telemetry.update();
@@ -585,7 +586,7 @@ public class RobotMecanum// extends LinearOpMode  //Robot
         moveOmni(0,0,0);
     }
     public void driveRange(double distanceFromWall, double power)
-        {
+    {
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -778,7 +779,8 @@ public class RobotMecanum// extends LinearOpMode  //Robot
      * @param numBlocks how many blocks to move up
      * @param power power at which to run the lift
      */
-    public void setLiftPosition(int numBlocks, double power){
+    public void setLiftPosition(int numBlocks, double power)
+    {
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -786,7 +788,11 @@ public class RobotMecanum// extends LinearOpMode  //Robot
 
         lift.setPower(power);
 
-        while(lift.isBusy());
+        while(lift.isBusy()){
+            telemetry.addData("Target Lift Position", lift.getTargetPosition());
+            telemetry.addData("Lift Position", lift.getCurrentPosition());
+            telemetry.update();
+        }
 
         lift.setPower(0);
 

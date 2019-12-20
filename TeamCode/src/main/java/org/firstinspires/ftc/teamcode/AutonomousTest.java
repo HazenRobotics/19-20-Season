@@ -42,15 +42,14 @@ public class AutonomousTest extends LinearOpMode
         waitForStart();
 
         //==========================================================================================
-        //Official
-
+        //Official Start
 
         while(opModeIsActive())
         {
             robotMecanum.testSensors();
         }
 
-/*
+    /*
         //robotMecanum.strafeTowardWall(0.75,16,false);
         telemetry.setAutoClear(false);
         //robotMecanum.strafe(-10,0.75);
@@ -58,8 +57,6 @@ public class AutonomousTest extends LinearOpMode
         //robotMecanum.strafeAwayFromWall(0.75, 40, false);
 
         //robotMecanum.strafeTime(0.75,2000);
-        //robotMecanum.strafeTowardWall(0.75,16,true);
-        //robotMecanum.strafeAwayFromWall(0.75,50,false);
         int times = 2;
         for(int i = 0; i < times; i++)
         {
@@ -69,17 +66,14 @@ public class AutonomousTest extends LinearOpMode
             sleep(10 * 1000);
             robotMecanum.strafeRange(50, -0.75, true);
 
-        }*/
+        }
+    */
 
 
-        /*
+    /*
         //step one, move forward to scan blocks
         driveTime(0.65, 400);
         robotMecanum.driveRange(14, 0.75);
-
-
-
-
 
 
         //scan blocks ands organize information
@@ -89,26 +83,26 @@ public class AutonomousTest extends LinearOpMode
         //tensor flow driving to blocks
         tensorFlowDrive();
 
-         */
+     */
 
         //return back to center
         //skystoneReturn();
 
        // robotMecanum.strafeRange(14.5, 0.75, true);
 
-        /*
+    /*
         //parking(true, false, 3);
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
-        */
+    */
 
-        /*
+    /*
         sideFoundation(true, 20000, 3000, 3000, 3000);
 
         sideFoundation(true, 20000, 4000, 4000, 4000);
 
         sideFoundation(true, 20000, 5000, 5000, 5000);
-*/
+    */
         //robotMecanum.turnGyro(90,0.2,true);
 
 

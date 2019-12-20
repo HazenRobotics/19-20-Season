@@ -30,7 +30,7 @@ public class TeleopMecanum extends OpMode
     @Override
     public void loop()
     {
-        /*telemetry.addData("           Controls", "   ");
+        telemetry.addData("           Controls", "   ");
         telemetry.addData("Steering", "Gp1: left stick y (axis) = drive");
         telemetry.addData("Steering", "Gp1: left stick x (axis) = strafe");
         telemetry.addData("Steering", "Gp1: right stick x (axis) = rotate");
@@ -39,7 +39,7 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("Lift", "Gp2: left stick y (axis)");
         telemetry.addData("Hooks", "Gp2: y = home");
         telemetry.addData("Hooks", "Gp2: a = extended    \n");
-        robotMecanum.printGyroHeading();*/
+        robotMecanum.printGyroHeading();
 
         telemetry.addData("front right sensor", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
         telemetry.addData("back right sensor", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
