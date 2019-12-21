@@ -53,48 +53,48 @@ public class AutonomousFoundationRight extends LinearOpMode
         sideFoundation(false, 20000, 9000, 5000, 5000);
 
     }
+
     public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
     {
 
-    if(isRedField)
-    {
-        robotMecanum.strafeRange(16, 0.75, true);
+        if(isRedField)
+        {
+            robotMecanum.strafeRange(16, 0.75, true);
 
-        //driveTime(0.65, 900);
+            //driveTime(0.65, 900);
 
-        robotMecanum.driveTime(0.75, drive1Time);
-        //robotMecanum.driveRange(34, 0.7);
-        robotMecanum.hooks(false);
-        sleep(250);
-        robotMecanum.driveTime(-0.75, drive2Time);
-        robotMecanum.turnGyro(45, 0.75, false);
-        //robotMecanum.driveRange(1, -0.75);
-        robotMecanum.hooks(true);
+            robotMecanum.driveTime(0.75, drive1Time);
+            //robotMecanum.driveRange(34, 0.7);
+            robotMecanum.hooks(false);
+            sleep(250);
+            robotMecanum.driveTime(-0.75, drive2Time);
+            robotMecanum.turnGyro(45, 0.75, false);
+            //robotMecanum.driveRange(1, -0.75);
+            robotMecanum.hooks(true);
 
-        robotMecanum.strafeTime(0.75, strafe2Time);
-        //robotMecanum.strafeRange(55, 0.75, true);
-    }
-    else
-    {
-        robotMecanum.strafeRange(16, -0.75, false);
+            robotMecanum.strafeTime(0.75, strafe2Time);
+            //robotMecanum.strafeRange(55, 0.75, true);
+        }
+        else
+        {
+            robotMecanum.strafeRange(16, -0.75, false);
 
-        //driveTime(0.65, 900);
+            //driveTime(0.65, 900);
 
-        robotMecanum.driveTime(0.75, drive1Time);
-        //robotMecanum.driveRange(34, 0.7);
-        robotMecanum.hooks(false);
-        sleep(250);
-        robotMecanum.driveTime(-0.75, drive2Time);
-        robotMecanum.turnGyro(45, 0.75, false);
-        //robotMecanum.driveRange(1, -0.75);
-        robotMecanum.hooks(true);
+            robotMecanum.driveTime(0.75, drive1Time);
+            //robotMecanum.driveRange(34, 0.7);
+            robotMecanum.hooks(false);
+            sleep(250);
+            robotMecanum.driveTime(-0.75, drive2Time);
+            robotMecanum.turnGyro(45, 0.75, false);
+            //robotMecanum.driveRange(1, -0.75);
+            robotMecanum.hooks(true);
 
-        robotMecanum.strafeTime(0.75, strafe2Time);
-        //robotMecanum.strafeRange(55, 0.75, false);
-    }
+            robotMecanum.strafeTime(0.75, strafe2Time);
+            //robotMecanum.strafeRange(55, 0.75, false);
+        }
     sleep(waitTime);
-}
-
+    }
 
 }
 

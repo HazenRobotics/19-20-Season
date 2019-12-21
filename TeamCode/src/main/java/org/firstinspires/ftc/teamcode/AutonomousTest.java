@@ -46,8 +46,10 @@ public class AutonomousTest extends LinearOpMode
 
         while(opModeIsActive())
         {
-            robotMecanum.testSensors();
+            robotMecanum.testSensors(false);
         }
+
+
 
     /*
         //robotMecanum.strafeTowardWall(0.75,16,false);
