@@ -31,6 +31,9 @@ public class RobotMecanum// extends Robot
 
     final double BACK_SENSOR_SEPERATION = 25/32;
 
+    final int ROBOT_WIDTH = 13; //sensor to sensor in inches
+    final int ROBOT_LENGTH = 17; //sensor to lift in inches
+
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
     final int TICKS_PER_BLOCK = 1;
@@ -43,16 +46,16 @@ public class RobotMecanum// extends Robot
 
     Servo leftHook;
     Servo rightHook;
-    final double LEFT_HOOK_HOME = convertDegreeToPercent(0.0,360.0);
-    final double RIGHT_HOOK_HOME = convertDegreeToPercent(0.0,360.0);
-    final double LEFT_HOOK_EXTENDED = convertDegreeToPercent(280.0,360.0);
-    final double RIGHT_HOOK_EXTENDED = convertDegreeToPercent(280.0,360.0);
+    final double LEFT_HOOK_HOME = convertDegreeToPercent(175,180);
+    final double RIGHT_HOOK_HOME = convertDegreeToPercent(175,180);
+    final double LEFT_HOOK_EXTENDED = convertDegreeToPercent(0,180.0);
+    final double RIGHT_HOOK_EXTENDED = convertDegreeToPercent(0,180.0);
     double leftHookPosition = LEFT_HOOK_HOME;
     double rightHookPosition =  RIGHT_HOOK_HOME;
 
     Servo claw;
-    final double CLAW_HOME = convertDegreeToPercent(180.0,360.0);
-    final double CLAW_EXTENDED = convertDegreeToPercent(360,360.0);
+    final double CLAW_HOME = convertDegreeToPercent(0,180);
+    final double CLAW_EXTENDED = convertDegreeToPercent(180,180);
     double clawPosition = CLAW_HOME;
 
     Servo capper;
@@ -102,8 +105,10 @@ public class RobotMecanum// extends Robot
 
         telemetry.setAutoClear(true);
 
+        //----------------------    lift
         lift = hardwareMap.dcMotor.get("lift");
 
+        //----------------------    motors/wheels
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
         frontRightWheel = hardwareMap.dcMotor.get("front_right_wheel");
@@ -118,59 +123,79 @@ public class RobotMecanum// extends Robot
         frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
         backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
-        //Claw
+        //----------------------    Claw
         claw = hardwareMap.servo.get("claw");
         claw.setDirection(Servo.Direction.REVERSE);
 
-        //capper
+        //----------------------    capper
         capper = hardwareMap.servo.get("capper");
+
+        //----------------------    gyro
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        gyro.calibrate();
+        while (gyro.isCalibrating()) ;
+
+        //----------------------    side sensors
+        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+
+        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
+        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
+        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
+
+        rangeSensorRightFront.initialize();
+        rangeSensorRightBack.initialize();
+        rangeSensorLeftFront.initialize();
+        rangeSensorLeftBack.initialize();
+
+        //----------------------    back sensors
+
+        rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
+        rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
+
+        /*rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
+        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));*/
+
+        rangeSensorBackLeft.initialize();
+        rangeSensorBackRight.initialize();
+
+        // get a reference to our ColorSensor object.
+        //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
+        //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
+        //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
+
+        //Set the zero power property of the wheels to BREAK
+        frontRightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
         if(!isTeleOP)
         {
-            gyro = hardwareMap.gyroSensor.get("gyro");
-            gyro.calibrate();
-            while (gyro.isCalibrating()) ;
-
             tensorFlow = new TensorFlow(hardwareMap, opMode);
-
-            rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
-            rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
-            rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
-            rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
-
-            rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
-            rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
-            rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-            rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
-
-            rangeSensorRightFront.initialize();
-            rangeSensorRightBack.initialize();
-            rangeSensorLeftFront.initialize();
-            rangeSensorLeftBack.initialize();
-
-
-            rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
-            rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
-
-            rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
-            rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
-
-            rangeSensorBackLeft.initialize();
-            rangeSensorBackRight.initialize();
-
-
-            // get a reference to our ColorSensor object.
-            //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
-            //colorSensorRight = hardwareMap.get(ColorSensor.class, "sensor_color_right");
-            //colorSensorRight.setI2cAddress(I2cAddr.create8bit(0X3A));
         }
     }
 
-    public void testSensors()
+    public void testSensors(boolean isCombinedSensors)
     {
-        telemetry.addData("Right Sensors",(rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 );
-        telemetry.addData("Left Sensors",(rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
-        telemetry.addData("Back Sensors",(rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 );
+        telemetry.addData("Right Front", rangeSensorRightFront.getDistance(DistanceUnit.INCH) );
+        telemetry.addData("Right Back", rangeSensorRightBack.getDistance(DistanceUnit.INCH) );
+        telemetry.addData("Left Front", rangeSensorLeftFront.getDistance(DistanceUnit.INCH) );
+        telemetry.addData("Left Back", rangeSensorLeftBack.getDistance(DistanceUnit.INCH) );
+        telemetry.addData("Back Right", rangeSensorBackRight.getDistance(DistanceUnit.INCH) );
+        telemetry.addData("Back Left", rangeSensorBackLeft.getDistance(DistanceUnit.INCH) );
+
+        if(isCombinedSensors)
+        {
+            telemetry.addData("Right Sensors", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2);
+            telemetry.addData("Left Sensors", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2);
+            telemetry.addData("Back Sensors", (rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2);
+        }
+
         telemetry.addData("Gyro Sensor", gyro.getHeading());
         telemetry.addData("New Gyro Sensor", getNewGyroHeading() );
 
@@ -262,8 +287,8 @@ public class RobotMecanum// extends Robot
     }
     public void moveOmni(double drivePower, double strafePower, double rotatePower)
     {
-        double drive = Math.signum(drivePower) * Math.pow(drivePower, 4);
-        double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 4);
+        double drive = Math.signum(-drivePower) * Math.pow(drivePower, 2);
+        double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 2);
         double rotate = rotatePower;
 
         double frontLeftPower = drive + strafe + rotate;
@@ -271,6 +296,25 @@ public class RobotMecanum// extends Robot
         double frontRightPower = drive - strafe - rotate;
         double backRightPower = drive + strafe - rotate;
 
+        //Set the wheel power according to variables
+        moveMotors(frontLeftPower, backLeftPower, frontRightPower, backRightPower);
+
+        //Print Telementary Data for the wheels
+        /*telemetry.addData("frontLeftPower", frontLeftPower);
+        telemetry.addData("backLeftPower", backLeftPower);
+        telemetry.addData("frontRightPower", frontRightPower);
+        telemetry.addData("backRightPower", backRightPower);*/
+    }
+
+    /**
+     * Sets power to the motors
+     * @param frontLeftPower power to set front left motor
+     * @param backLeftPower power to set back left motor
+     * @param frontRightPower power to set front right motor
+     * @param backRightPower power to set back right motor
+     */
+    public void moveMotors(double frontLeftPower, double backLeftPower, double frontRightPower, double backRightPower)
+    {
         //Set the wheel power according to variables
         frontLeftWheel.setPower(frontLeftPower);
         backLeftWheel.setPower(backLeftPower);
@@ -285,20 +329,19 @@ public class RobotMecanum// extends Robot
     }
     public void drive(double distance, double power)
     {
-        setEncoders(distance);
+        setEncoders(distance,power);
         moveOmni( power, 0, 0);
         runEncoders(true,power);
-
     }
 
-    public void strafe(double distance, double power)
+    public void strafestrafe(double distance, double power)
     {
-        setEncoders(distance);
+        setEncoders(distance, power);
         moveOmni( 0, power, 0);
         runEncoders(false,power);
     }
 
-    private void setEncoders( double distance)
+    private void setEncoders( double distance, double power)
     {
         try
         {
@@ -325,11 +368,11 @@ public class RobotMecanum// extends Robot
             telemetry.addData("Error" , "Cannot set \"STOP_AND_RESET_ENCODER\", check your mapping");
             telemetry.update();
         }
-        setEncoderPos(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI));
+        setEncoderPos(convertDistTicks(distance, WHEEL_DIAMETER * Math.PI), power);
 
     }
 
-    private boolean setEncoderPos(double distance)
+    private boolean setEncoderPos(double distance, double power)
     {
 
         boolean success = true;             // Tells whether setting encoders is successful or not
@@ -354,8 +397,7 @@ public class RobotMecanum// extends Robot
                 as normal forward and backward distance(theoretically). Because the wheels move at
                 different speeds, I opted to average them to find correct distance.
              */
-            avgMotion = Math.abs((frontLeftWheel.getPower()) + Math.abs(backLeftWheel.getPower()) +
-                    Math.abs(frontRightWheel.getPower()) + Math.abs(backRightWheel.getPower())) / 4;
+            avgMotion = power;
 
 
             // Calculate the average number of counts for the motors.
@@ -505,12 +547,12 @@ public class RobotMecanum// extends Robot
         }
 
         telemetry.addData("away", (power > 0  && !isRightSensor && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                                             || (power < 0  && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall) );
+                || (power < 0  && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall) );
         telemetry.update();
 
         //moving towards a wall
         while((power > 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-           || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
+                || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
         {
             moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime) );
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
@@ -544,12 +586,12 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? power : -power;
         moveOmni(0, power, 0);
 
-        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
-        || (!usingRightSensors && (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)) {
+        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2 > distanceFromWall)
+                || (!usingRightSensors && (getSideDistance(rangeSensorLeftFront) +  getSideDistance(rangeSensorLeftBack)) / 2 > distanceFromWall)) {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             previousTime = opMode.getRuntime();
-            telemetry.addData("rightT", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
-            telemetry.addData("leftT", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.addData("rightT", (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2) ;
+            telemetry.addData("leftT", (getSideDistance(rangeSensorLeftFront) + getSideDistance(rangeSensorLeftBack)) / 2 );
             telemetry.update();
         }
         moveOmni(0,0,0);
@@ -575,12 +617,12 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? -power : power;
         moveOmni(0, power, 0);
 
-        while((usingRightSensors && rangeSensorRightFront.getDistance(DistanceUnit.INCH) < distanceFromWall)
-          || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall))
-            {
+        while((usingRightSensors && getSideDistance(rangeSensorRightFront) < distanceFromWall)
+                || (!usingRightSensors && getSideDistance(rangeSensorLeftFront) < distanceFromWall))
+        {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
-            telemetry.addData("rightA", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
-            telemetry.addData("leftA", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.addData("rightA", (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2) ;
+            telemetry.addData("leftA", (getSideDistance(rangeSensorLeftFront) + getSideDistance(rangeSensorLeftBack)) / 2 );
             telemetry.update();
         }
         moveOmni(0,0,0);
@@ -599,17 +641,17 @@ public class RobotMecanum// extends Robot
         moveOmni(power, 0, 0);
 
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while((power > 0 && (rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-         ||   (power < 0 && (rangeSensorBackRight.getDistance(DistanceUnit.INCH) + rangeSensorBackLeft.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall) )
+        while((power > 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 < distanceFromWall)
+                ||   (power < 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 > distanceFromWall) )
         {
             moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
-            telemetry.addData("distance from wall", rangeSensorBackRight.getDistance(DistanceUnit.INCH));
+            telemetry.addData("distance from wall", getBackDistance(rangeSensorBackRight));
             telemetry.update();
             previousTime = opMode.getRuntime();
         }
         moveOmni(0,0,0);
     }
-
+/*
     public void incrementalDrive(double distance, double power, boolean isStrafe)
     {
         for(int i = 0; i < distance/2; i++)
@@ -619,7 +661,7 @@ public class RobotMecanum// extends Robot
             else
                 drive(2, power);
         }
-    }
+    }*/
     public double convertDegreeToPercent(double desiredAngle, double maxAngle)
     {
         return desiredAngle/maxAngle;
@@ -636,7 +678,7 @@ public class RobotMecanum// extends Robot
 
     /**
      * @param targetAngleFromWall   - angle from the wall - 0 is parallel
-     * @param range1Reading         - the distance from back left sensor to the wall    doesn't matter which you put in, left or right sensor
+     * @param range1Reading         - the distance from back left sensor to the wall    doesn't matter which you enter in, left or right sensor
      * @param range2Reading         - the distance from back right sensor to the wall                           ||
      * @param time                  - current time  -  usually (opMode.getRuntime() - previousTime)
      */
@@ -788,7 +830,8 @@ public class RobotMecanum// extends Robot
 
         lift.setPower(power);
 
-        while(lift.isBusy()){
+        while(lift.isBusy())
+        {
             telemetry.addData("Target Lift Position", lift.getTargetPosition());
             telemetry.addData("Lift Position", lift.getCurrentPosition());
             telemetry.update();
@@ -797,6 +840,27 @@ public class RobotMecanum// extends Robot
         lift.setPower(0);
 
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    /**
+     * gets distance from center of robot to side wall
+     * @param sensor sensor to read from
+     * @return robot's distance from wall
+     */
+    public double getSideDistance(ModernRoboticsI2cRangeSensor sensor)
+    {
+        return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_WIDTH/2;
+
+    }
+
+    /**
+     * gets distance from center of robot to back wall
+     * @param sensor sensor to read from
+     * @return robot's distance from wall
+     */
+    public double getBackDistance(ModernRoboticsI2cRangeSensor sensor)
+    {
+        return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_LENGTH/2;
     }
 
 }

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+//import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.android.AndroidGyroscope;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -54,9 +54,12 @@ public class AutonomousTensorFlowTest extends LinearOpMode
         //Official Start
 
         telemetry.setAutoClear(false);
+        robotMecanum.tensorFlowPrep();
+
+
+/*
         //step one, move forward to scan blocks
         robotMecanum.driveRange(14, 0.75);
-
 
         //scan blocks ands organize information
         robotMecanum.tensorFlowPrep();
@@ -66,11 +69,10 @@ public class AutonomousTensorFlowTest extends LinearOpMode
         tensorFlowDrive();
 
 
-
         //return back to center
         skystoneReturn();
 
-
+*/
 
     }
     //==============================================================================================
