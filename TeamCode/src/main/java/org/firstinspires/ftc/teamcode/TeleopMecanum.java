@@ -21,7 +21,7 @@ public class TeleopMecanum extends OpMode
     @Override
     public void init()
     {
-        robotMecanum = new RobotMecanum(hardwareMap, this, false);
+        robotMecanum = new RobotMecanum(hardwareMap, this, true);
         robotMecanum.telemetry.setAutoClear(true);
     }
 

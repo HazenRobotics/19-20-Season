@@ -15,9 +15,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 // backs up to the starting point using encoders to measure the distance.
 // This example assumes there is one encoder, attached to the left motor
 
-@Autonomous(name="Autonomous-FoundationRight")
+@Autonomous(name="Autonomous-FoundationRed")
 //@disabled
-public class AutonomousFoundationRight extends LinearOpMode
+public class AutonomousFoundationRed extends LinearOpMode
 {
     RobotMecanum robotMecanum;
 
