@@ -97,7 +97,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(-20, 0.75);
     */
 
-        sideFoundation(-1, 750, 1200, 400, 80, 250, 1500);
+        sideFoundation(-1, 750, 1200, 400, 80, 500, 1750);
         //robotMecanum.turnGyro(90,0.2,true);
     }
 
@@ -135,13 +135,14 @@ public class AutonomousTest extends LinearOpMode
 
         double rightMove = isRedField == -1 ? 0.65 : 0;
         double leftMove = isRedField == -1 ? 0 : 0.65;
-        while ((robotMecanum.getNewGyroHeading() <= 180 + turnAngle && isRedField == -1) || (robotMecanum.getNewGyroHeading() >= 180 - turnAngle && isRedField == 1))
+        while ((robotMecanum.getNewGyroHeading() <  180 - turnAngle && isRedField == -1) || (robotMecanum.getNewGyroHeading() >= 180 - turnAngle && isRedField == 1))
             robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
-        robotMecanum.driveTime(0.75, drive3Time);
-
+        robotMecanum.driveTime(0.7, drive3Time);
+        robotMecanum.driveTime(-0.65, drive4Time);
     }
+
     /*
     private void sideFoundationRange(int isRedField)
     {

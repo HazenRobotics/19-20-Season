@@ -617,12 +617,12 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? -power : power;
         moveOmni(0, power, 0);
 
-        while((usingRightSensors && rangeSensorRightFront.getDistance(DistanceUnit.INCH) < distanceFromWall)
-                || (!usingRightSensors && rangeSensorLeftFront.getDistance(DistanceUnit.INCH) < distanceFromWall))
+        while((usingRightSensors && getSideDistance(rangeSensorRightFront) < distanceFromWall)
+                || (!usingRightSensors && getSideDistance(rangeSensorLeftFront) < distanceFromWall))
         {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
-            telemetry.addData("rightA", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2) ;
-            telemetry.addData("leftA", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 );
+            telemetry.addData("rightA", (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2) ;
+            telemetry.addData("leftA", (getSideDistance(rangeSensorLeftFront) + getSideDistance(rangeSensorLeftBack)) / 2 );
             telemetry.update();
         }
         moveOmni(0,0,0);
@@ -850,6 +850,7 @@ public class RobotMecanum// extends Robot
     public double getSideDistance(ModernRoboticsI2cRangeSensor sensor)
     {
         return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_WIDTH/2;
+
     }
 
     /**
