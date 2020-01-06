@@ -135,7 +135,7 @@ public class AutonomousTest extends LinearOpMode
 
         double rightMove = isRedField == -1 ? 0.65 : 0;
         double leftMove = isRedField == -1 ? 0 : 0.65;
-        while ((robotMecanum.getNewGyroHeading() <  180 - turnAngle && isRedField == -1) || (robotMecanum.getNewGyroHeading() >= 180 - turnAngle && isRedField == 1))
+        while ((robotMecanum.getNewGyroHeading() <  180 + turnAngle && isRedField == -1) || (robotMecanum.getNewGyroHeading() > 180 - turnAngle && isRedField == 1))
             robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
