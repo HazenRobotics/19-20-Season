@@ -141,10 +141,10 @@ public class RobotMecanum// extends Robot
         rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
         rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
 
-        rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
+        /*rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
         rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
         rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
+        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));*/
 
         rangeSensorRightFront.initialize();
         rangeSensorRightBack.initialize();

@@ -39,8 +39,9 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("Lift", "Gp2: left stick y (axis)");
         telemetry.addData("Hooks", "Gp2: y = home");
         telemetry.addData("Hooks", "Gp2: a = extended    \n");
-        robotMecanum.printGyroHeading();
 
+        telemetry.addData("Gyro", robotMecanum.ge);
+        telemetry.addData("Hooks", "Gp2: a = extended    \n");
         telemetry.addData("Right front", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
         telemetry.addData("Right back", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
         telemetry.addData("Left front", robotMecanum.rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
