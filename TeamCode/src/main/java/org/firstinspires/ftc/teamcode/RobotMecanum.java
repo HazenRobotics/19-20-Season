@@ -1,6 +1,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -11,8 +13,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.util.Locale;
 
 public class RobotMecanum// extends Robot
 {
@@ -33,6 +43,7 @@ public class RobotMecanum// extends Robot
 
     final int ROBOT_WIDTH = 13; //sensor to sensor in inches
     final int ROBOT_LENGTH = 17; //sensor to lift in inches
+
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
@@ -135,6 +146,7 @@ public class RobotMecanum// extends Robot
         gyro.calibrate();
         while (gyro.isCalibrating()) ;
 
+
         //----------------------    side sensors
         rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
         rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
@@ -175,9 +187,7 @@ public class RobotMecanum// extends Robot
 
 
         if(!isTeleOP)
-        {
             tensorFlow = new TensorFlow(hardwareMap, opMode);
-        }
     }
 
     public void testSensors(boolean isCombinedSensors)
@@ -201,15 +211,17 @@ public class RobotMecanum// extends Robot
 
         telemetry.update();
     }
-
     /**
-     * @param power power for the wheels
-     * @param time time to drive in MILLISECONDS
+     * @param drivePower - sets power to drive - negative power is backwards
+     * @param strafePower - sets power to strafe - negative power is left
+     * @param time  - amount of time to run the motors in MILLISECONDS
      */
-    public void strafeTime(double power, long time)
+    public void omniTime(double drivePower, double strafePower, long time)
     {
+        gyro.resetZAxisIntegrator();
         //set power to 'drive' motors
-        moveOmni(0, power, 0);
+
+        moveOmni(drivePower, strafePower, 0);
 
         //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
@@ -218,21 +230,22 @@ public class RobotMecanum// extends Robot
 
         while(System.currentTimeMillis() - setTime < (time))
         {
-            moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
+            moveOmni(drivePower, strafePower, gyroPID(180, opMode.getRuntime() - previousTime));
             previousTime = opMode.getRuntime();
         }
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
     }
     /**
-     * @param power - sets power to wheels - negative power is backwards
+     * @param liftPower - sets power to the lift - negative power is supposedly down
      * @param time  - amount of time to run the motors in MILLISECONDS
      */
-    public void driveTime(double power, long time)
+    public void liftTime(double liftPower, long time)
     {
+        gyro.resetZAxisIntegrator();
         //set power to 'drive' motors
 
-        moveOmni(power, 0, 0);
+        moveOmni(liftPower, 0, 0);
 
         //wait for certain amount of time while motors are running
         //robotMecanum.wait(time);
@@ -241,7 +254,31 @@ public class RobotMecanum// extends Robot
 
         while(System.currentTimeMillis() - setTime < (time))
         {
-            moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
+            lift.setPower(liftPower * MAX_LIFT_SPEED);
+            previousTime = opMode.getRuntime();
+        }
+        //sets all power to zero afterwords
+        moveOmni(0, 0, 0);
+    }
+    /**
+     * @param rotatePower - sets power to wheels - negative power is left
+     * @param time  - amount of time to run the motors in MILLISECONDS
+     */
+    public void rotateTime(double rotatePower, long time)
+    {
+        gyro.resetZAxisIntegrator();
+        //set power to 'drive' motors
+
+        moveOmni(0, 0, rotatePower);
+
+        //wait for certain amount of time while motors are running
+        //robotMecanum.wait(time);
+        long setTime = System.currentTimeMillis();
+        previousTime = opMode.getRuntime();
+
+        while(System.currentTimeMillis() - setTime < (time))
+        {
+            moveOmni(0, 0, rotatePower);
             previousTime = opMode.getRuntime();
         }
         //sets all power to zero afterwords
@@ -289,7 +326,7 @@ public class RobotMecanum// extends Robot
     {
         double drive = Math.signum(-drivePower) * Math.pow(drivePower, 2);
         double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 2);
-        double rotate = rotatePower;
+        double rotate = -rotatePower;
 
         double frontLeftPower = drive + strafe + rotate;
         double backLeftPower = drive - strafe + rotate;
@@ -651,7 +688,7 @@ public class RobotMecanum// extends Robot
         }
         moveOmni(0,0,0);
     }
-/*
+    /*
     public void incrementalDrive(double distance, double power, boolean isStrafe)
     {
         for(int i = 0; i < distance/2; i++)
@@ -661,7 +698,8 @@ public class RobotMecanum// extends Robot
             else
                 drive(2, power);
         }
-    }*/
+    }
+        */
     public double convertDegreeToPercent(double desiredAngle, double maxAngle)
     {
         return desiredAngle/maxAngle;
@@ -693,7 +731,7 @@ public class RobotMecanum// extends Robot
     }
     public int getNewGyroHeading()
     {
-        return (gyro.getHeading() + 180 ) % 360;
+        return ( gyro.getHeading() + 180 ) % 360;
     }
     //==============================================================================================   turnGyro
     //not ready or programmed yet
@@ -862,6 +900,7 @@ public class RobotMecanum// extends Robot
     {
         return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_LENGTH/2;
     }
+
 
 }
 

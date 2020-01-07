@@ -45,9 +45,7 @@ public class AutonomousTest extends LinearOpMode
         //Official Start
 /*
         while(opModeIsActive())
-        {
             robotMecanum.testSensors(false);
-        }
 */
 
     /*
@@ -85,18 +83,16 @@ public class AutonomousTest extends LinearOpMode
         tensorFlowDrive();
 */
 
-
         //return back to center
         //skystoneReturn();
 
-       // robotMecanum.strafeRange(14.5, 0.75, true);
+        //robotMecanum.strafeRange(14.5, 0.75, true);
 
     /*
         //parking(true, false, 3);
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
     */
-
         sideFoundation(-1, 750, 1200, 400, 80, 500, 1750);
         //robotMecanum.turnGyro(90,0.2,true);
     }
@@ -114,18 +110,21 @@ public class AutonomousTest extends LinearOpMode
      */
     public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnAngle, int drive3Time, int drive4Time)
     {
+        robotMecanum.liftTime(0.5, 1000);
+
         //double leftMove = 0, rightMove = 0;
         //robotMecanum.strafeRange(16, 0.75, true);
 
         //driveTime(0.65, 900);
-        robotMecanum.strafeTime(-isRedField * 0.75, strafeTime);
+        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime);
         sleep(250);
-        robotMecanum.driveTime(0.7, drive1Time);
+        robotMecanum.omniTime(0.7, 0, drive1Time);
+
         sleep(250);
         //robotMecanum.driveRange(34, 0.7);
         robotMecanum.hooks(false);
         sleep(500);
-        robotMecanum.driveTime(-0.75, drive2Time);
+        robotMecanum.omniTime(-0.75, 0, drive2Time);
         sleep(250);
 
        /* if(isRedField == -1)
@@ -135,12 +134,23 @@ public class AutonomousTest extends LinearOpMode
 
         double rightMove = isRedField == -1 ? 0.65 : 0;
         double leftMove = isRedField == -1 ? 0 : 0.65;
-        while ((robotMecanum.getNewGyroHeading() <  180 + turnAngle && isRedField == -1) || (robotMecanum.getNewGyroHeading() > 180 - turnAngle && isRedField == 1))
-            robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+
+        robotMecanum.gyro.resetZAxisIntegrator();
+        if(isRedField == 1)
+        {
+            while (robotMecanum.getNewGyroHeading() < 180 + turnAngle)
+                robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }
+        if(isRedField == -1)
+        {
+            while (robotMecanum.getNewGyroHeading() > 180 - turnAngle)
+                robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
-        robotMecanum.driveTime(0.7, drive3Time);
-        robotMecanum.driveTime(-0.65, drive4Time);
+        robotMecanum.omniTime(0.7, 0, drive3Time);
+        robotMecanum.hooks(true);
+        robotMecanum.omniTime(-0.65, 0, drive4Time);
     }
 
     /*

@@ -44,62 +44,64 @@ public class AutonomousFoundationBlue extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        //move forward to grab foundation
-        robotMecanum.driveTime(0.7, 1000);
-        robotMecanum.driveRange(38,0.65);
-
-        //grab foundation
-        robotMecanum.claw(true);
-
-        //return to wall
-        robotMecanum.driveTime(-0.75, 2500);
-
-        //drop
-        robotMecanum.claw(false);
-
-        robotMecanum.strafeTime(-0.75, 3000);
-
-        robotMecanum.strafeRange(65, 0.75, true);
-
+        sideFoundation(-1, 750, 1200, 400, 80, 500, 1750);
     }
-    public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
-{
 
-    if(isRedField)
+    /**
+     *drives and picks up foundation and moves foundation to target zone <br><br> <b>Note: time is in ms</b>
+     *
+     * @param isRedField 1 if red and -1 if blue
+     * @param strafeTime time to align with middle of foundation <i>Target: 11"</i>
+     * @param drive1Time time to drive to foundation      <i>Target: 30"</i>
+     * @param drive2Time time to drive foundation back    <i>Target: 6"</i>
+     * @param turnAngle angle need to turn foundation against wall
+     * @param drive3Time time to drive foundation against wall <i>Target: 6"</i>
+     * @param drive4Time time to drive to park
+     */
+    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnAngle, int drive3Time, int drive4Time)
     {
-        robotMecanum.strafeRange(16, 0.75, true);
+        robotMecanum.liftTime(0.5, 1000);
+
+        //double leftMove = 0, rightMove = 0;
+        //robotMecanum.strafeRange(16, 0.75, true);
 
         //driveTime(0.65, 900);
+        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime);
+        sleep(250);
+        robotMecanum.omniTime(0.7, 0, drive1Time);
 
-        robotMecanum.driveTime(0.75, drive1Time);
+        sleep(250);
         //robotMecanum.driveRange(34, 0.7);
         robotMecanum.hooks(false);
+        sleep(500);
+        robotMecanum.omniTime(-0.75, 0, drive2Time);
         sleep(250);
-        robotMecanum.driveTime(-0.75, drive2Time);
-        //robotMecanum.driveRange(1, -0.75);
+
+       /* if(isRedField == -1)
+            rightMove = -0.65;
+        else
+            leftMove = -0.65;*/
+
+        double rightMove = isRedField == -1 ? 0.65 : 0;
+        double leftMove = isRedField == -1 ? 0 : 0.65;
+
+        robotMecanum.gyro.resetZAxisIntegrator();
+        if(isRedField == 1)
+        {
+            while (robotMecanum.getNewGyroHeading() < 180 + turnAngle)
+                robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }
+        if(isRedField == -1)
+        {
+            while (robotMecanum.getNewGyroHeading() > 180 - turnAngle)
+                robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }
+        //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
+
+        robotMecanum.omniTime(0.7, 0, drive3Time);
         robotMecanum.hooks(true);
-
-        robotMecanum.strafeTime(0.75, strafe2Time);
-        //robotMecanum.strafeRange(55, 0.75, true);
+        robotMecanum.omniTime(-0.65, 0, drive4Time);
     }
-    else
-    {
-        robotMecanum.strafeRange(16, -0.75, false);
 
-        //driveTime(0.65, 900);
-
-        robotMecanum.driveTime(0.75, drive1Time);
-        //robotMecanum.driveRange(34, 0.7);
-        robotMecanum.hooks(false);
-        sleep(250);
-        robotMecanum.driveTime(-0.75, drive2Time);
-        //robotMecanum.driveRange(1, -0.75);
-        robotMecanum.hooks(true);
-
-        robotMecanum.strafeTime(0.75, strafe2Time);
-        //robotMecanum.strafeRange(55, 0.75, false);
-    }
-    sleep(waitTime);
-}
 }
 

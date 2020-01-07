@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name="TeleOpMecanum")
 public class TeleopMecanum extends OpMode
 {
-    DcMotor lift;
+
     final double MAX_LIFT_SPEED = 1;
 
     RobotMecanum robotMecanum;
@@ -30,6 +30,8 @@ public class TeleopMecanum extends OpMode
     @Override
     public void loop()
     {
+
+        /*
         telemetry.addData("           Controls", "   ");
         telemetry.addData("Steering", "Gp1: left stick y (axis) = drive");
         telemetry.addData("Steering", "Gp1: left stick x (axis) = strafe");
@@ -38,41 +40,28 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("Claw", "Gp2: x = extended");
         telemetry.addData("Lift", "Gp2: left stick y (axis)");
         telemetry.addData("Hooks", "Gp2: y = home");
-        telemetry.addData("Hooks", "Gp2: a = extended    \n");
+        telemetry.addData("Hooks", "Gp2: a = extended    \n");*/
 
-        telemetry.addData("Gyro", robotMecanum.ge);
-        telemetry.addData("Hooks", "Gp2: a = extended    \n");
+        telemetry.addData("Old Gyro  ", robotMecanum.gyro.getHeading());
+        telemetry.addData("New Gyro  ", robotMecanum.getNewGyroHeading());
+        telemetry.addData("Lift      ", robotMecanum.lift.getCurrentPosition());
+        telemetry.addData("front  left wheel", robotMecanum.frontLeftWheel.getCurrentPosition());
+        telemetry.addData("back  left wheel", robotMecanum.backLeftWheel.getCurrentPosition());
+        telemetry.addData("front right wheel", robotMecanum.frontRightWheel.getCurrentPosition());
+        telemetry.addData("back right wheel", robotMecanum.backRightWheel.getCurrentPosition());
+
+        /*
         telemetry.addData("Right front", robotMecanum.rangeSensorRightFront.getDistance(DistanceUnit.INCH));
         telemetry.addData("Right back", robotMecanum.rangeSensorRightBack.getDistance(DistanceUnit.INCH));
         telemetry.addData("Left front", robotMecanum.rangeSensorLeftFront.getDistance(DistanceUnit.INCH));
         telemetry.addData("Left back", robotMecanum.rangeSensorLeftBack.getDistance(DistanceUnit.INCH));
         telemetry.addData("Back right", robotMecanum.rangeSensorBackRight.getDistance(DistanceUnit.INCH));
         telemetry.addData("Back left", robotMecanum.rangeSensorBackLeft.getDistance(DistanceUnit.INCH));
+        */
 
-        //front left wheel power = y
-        if(gamepad1.y)
-            robotMecanum.frontLeftWheel.setPower(1);
-        else
-            robotMecanum.frontLeftWheel.setPower(0);
 
-        //front right wheel power = b
-        if(gamepad1.b)
-            robotMecanum.frontRightWheel.setPower(1);
-        else
-            robotMecanum.frontRightWheel.setPower(0);
-
-        //back left wheel power = x
-        if(gamepad1.x)
-            robotMecanum.backLeftWheel.setPower(1);
-        else
-            robotMecanum.backLeftWheel.setPower(0);
-
-        //back right wheel power = a
-        if(gamepad1.a)
-            robotMecanum.backRightWheel.setPower(1);
-        else
-            robotMecanum.backRightWheel.setPower(0);
-
+        //Lift
+        robotMecanum.lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
 
         //Claw
         if(gamepad2.b)
@@ -105,14 +94,12 @@ public class TeleopMecanum extends OpMode
         }
 
         //Driving
-        robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.right_stick_x, -gamepad1.left_stick_x);
+        robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_stick_x);
 
         //robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
         //robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
 
-        /*
-        //Lift
-        if (gamepad2.left_stick_y > 0)
+        /*if (gamepad2.left_stick_y > 0)
         {
             lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED * 0.4);
             telemetry.addData("Lift", "down");
@@ -123,12 +110,35 @@ public class TeleopMecanum extends OpMode
             telemetry.addData("Lift", "up");
         }
         else
-        {
             lift.setPower(0);
-        }
 
          */
-        robotMecanum.lift.setPower(-gamepad2.left_stick_y * MAX_LIFT_SPEED);
+
+        /*
+
+        //front left wheel power = y
+        if(gamepad1.y)
+            robotMecanum.frontLeftWheel.setPower(1);
+        else
+            robotMecanum.frontLeftWheel.setPower(0);
+
+        //front right wheel power = b
+        if(gamepad1.b)
+            robotMecanum.frontRightWheel.setPower(1);
+        else
+            robotMecanum.frontRightWheel.setPower(0);
+
+        //back left wheel power = x
+        if(gamepad1.x)
+            robotMecanum.backLeftWheel.setPower(1);
+        else
+            robotMecanum.backLeftWheel.setPower(0);
+
+        //back right wheel power = a
+        if(gamepad1.a)
+            robotMecanum.backRightWheel.setPower(1);
+        else
+            robotMecanum.backRightWheel.setPower(0);*/
 
 
         telemetry.update();

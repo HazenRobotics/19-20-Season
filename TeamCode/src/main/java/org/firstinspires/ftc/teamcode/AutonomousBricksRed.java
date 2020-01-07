@@ -46,34 +46,34 @@ public class AutonomousBricksRed extends LinearOpMode
 
 
         //drive forward
-        robotMecanum.driveTime(0.7, 1000);
+        robotMecanum.omniTime(0.7, 0, 1000);
         sleep(500);
         //claw down/extended
         robotMecanum.claw(false);
 
         //drive back slightly
-        robotMecanum.driveTime(-0.75, 500);
+        robotMecanum.omniTime(-0.75, 0, 500);
 
         //strafe right to wall
-        robotMecanum.strafeTime(0.75, 3600);
+        robotMecanum.omniTime(0, 0.75, 3600);
 
         //claw up/home
         robotMecanum.claw(true);
 
         //strafe left ot other side
-        robotMecanum.strafeTime(-0.75, 3600);
+        robotMecanum.omniTime(0, -0.75, 3600);
 
         //forward
-        robotMecanum.driveTime(0.75, 500);
+        robotMecanum.omniTime(0.75, 0, 500);
 
         //grab block
         robotMecanum.claw(true);
 
         //back small amount
-        robotMecanum.driveTime(-0.75, 500);
+        robotMecanum.omniTime(-0.75, 0, 500);
 
         //strafe
-        robotMecanum.strafeTime(-0.75, 4000);
+        robotMecanum.omniTime(0, -0.75, 4000);
 
         //drop
         robotMecanum.claw(false);
@@ -90,15 +90,15 @@ public class AutonomousBricksRed extends LinearOpMode
 
             //driveTime(0.65, 900);
 
-            robotMecanum.driveTime(0.75, drive1Time);
+            robotMecanum.omniTime(0.75, 0, drive1Time);
             //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.driveTime(-0.75, drive2Time);
+            robotMecanum.omniTime(-0.75, 0, drive2Time);
             //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.strafeTime(0.75, strafe2Time);
+            robotMecanum.omniTime(0, 0.75, strafe2Time);
             //robotMecanum.strafeRange(55, 0.75, true);
         }
         else
@@ -107,15 +107,15 @@ public class AutonomousBricksRed extends LinearOpMode
 
             //driveTime(0.65, 900);
 
-            robotMecanum.driveTime(0.75, drive1Time);
+            robotMecanum.omniTime(0.75, 0, drive1Time);
             //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.driveTime(-0.75, drive2Time);
+            robotMecanum.omniTime(-0.75, 0, drive2Time);
             //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.strafeTime(0.75, strafe2Time);
+            robotMecanum.omniTime(0, 0.75, strafe2Time);
             //robotMecanum.strafeRange(55, 0.75, false);
         }
         sleep(waitTime);
