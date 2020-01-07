@@ -44,7 +44,6 @@ public class RobotMecanum// extends Robot
     final int ROBOT_WIDTH = 13; //sensor to sensor in inches
     final int ROBOT_LENGTH = 17; //sensor to lift in inches
 
-
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
     final int TICKS_PER_BLOCK = 1;
@@ -144,8 +143,8 @@ public class RobotMecanum// extends Robot
         //----------------------    gyro
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
-        while (gyro.isCalibrating()) ;
-
+        while (gyro.isCalibrating());
+        gyro.resetZAxisIntegrator();
 
         //----------------------    side sensors
         rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
@@ -305,6 +304,7 @@ public class RobotMecanum// extends Robot
     {
         tensorFlow.initVuforia();
     }
+
     public void printGyroHeading()
     {
         telemetry.addData("Gyro Heading", gyro.getHeading() );
@@ -900,7 +900,6 @@ public class RobotMecanum// extends Robot
     {
         return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_LENGTH/2;
     }
-
 
 }
 
