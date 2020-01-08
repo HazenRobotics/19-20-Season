@@ -93,7 +93,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
     */
-        sideFoundation(-1, 750, 1200, 400, 80, 500, 1750);
+        sideFoundation(-1, 750, 1200, 1500, 80, 2000, 1000);
         //robotMecanum.turnGyro(90,0.2,true);
     }
 
@@ -104,13 +104,13 @@ public class AutonomousTest extends LinearOpMode
      * @param strafeTime time to align with middle of foundation <i>Target: 11"</i>
      * @param drive1Time time to drive to foundation      <i>Target: 30"</i>
      * @param drive2Time time to drive foundation back    <i>Target: 6"</i>
-     * @param turnAngle angle need to turn foundation against wall
+     * @param turnTime time to turn foundation against wall
      * @param drive3Time time to drive foundation against wall <i>Target: 6"</i>
      * @param drive4Time time to drive to park
      */
-    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnAngle, int drive3Time, int drive4Time)
+    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnTime, int drive3Time, int drive4Time)
     {
-        robotMecanum.liftTime(0.5, 1000);
+        robotMecanum.setLiftPosition(1,0.9);
 
         //double leftMove = 0, rightMove = 0;
         //robotMecanum.strafeRange(16, 0.75, true);
@@ -135,8 +135,19 @@ public class AutonomousTest extends LinearOpMode
         double rightMove = isRedField == -1 ? 0.65 : 0;
         double leftMove = isRedField == -1 ? 0 : 0.65;
 
-        robotMecanum.gyro.resetZAxisIntegrator();
         if(isRedField == 1)
+        {
+            robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+            sleep(turnTime);
+        }
+        if(isRedField == -1)
+        {
+            robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
+            sleep(turnTime);
+        }
+        robotMecanum.moveOmni(0, 0, 0);
+        //robotMecanum.gyro.resetZAxisIntegrator();
+        /*if(isRedField == 1)
         {
             while (robotMecanum.getNewGyroHeading() < 180 + turnAngle)
                 robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
@@ -145,12 +156,18 @@ public class AutonomousTest extends LinearOpMode
         {
             while (robotMecanum.getNewGyroHeading() > 180 - turnAngle)
                 robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
-        }
+        }*/
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
-        robotMecanum.omniTime(0.7, 0, drive3Time);
+        //robotMecanum.omniTime(0.7, 0, drive3Time);
+
         robotMecanum.hooks(true);
-        robotMecanum.omniTime(-0.65, 0, drive4Time);
+
+        robotMecanum.omniTime(0, isRedField * 0.75, drive3Time);
+
+        robotMecanum.setLiftPosition(0,0.75);
+
+        robotMecanum.omniTime(0,isRedField*0.75, drive4Time);
     }
 
     /*

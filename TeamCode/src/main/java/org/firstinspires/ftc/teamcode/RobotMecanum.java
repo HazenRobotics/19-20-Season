@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -46,7 +47,8 @@ public class RobotMecanum// extends Robot
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
-    final int TICKS_PER_BLOCK = 1;
+    final int TICKS_PER_BLOCK = -1600;
+    final int BASE_TICKS_OFF_GROUND = -350;
 
     //Define Wheel Motors
     DcMotor frontLeftWheel;
@@ -117,12 +119,24 @@ public class RobotMecanum// extends Robot
 
         //----------------------    lift
         lift = hardwareMap.dcMotor.get("lift");
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //----------------------    motors/wheels
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
         frontRightWheel = hardwareMap.dcMotor.get("front_right_wheel");
         backRightWheel = hardwareMap.dcMotor.get("back_right_wheel");
+
+        frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftHook = hardwareMap.servo.get("left_hook");
         rightHook = hardwareMap.servo.get("right_hook");
@@ -144,7 +158,6 @@ public class RobotMecanum// extends Robot
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
         while (gyro.isCalibrating());
-        gyro.resetZAxisIntegrator();
 
         //----------------------    side sensors
         rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
@@ -155,12 +168,12 @@ public class RobotMecanum// extends Robot
         /*rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
         rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
         rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));*/
+        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
 
         rangeSensorRightFront.initialize();
         rangeSensorRightBack.initialize();
         rangeSensorLeftFront.initialize();
-        rangeSensorLeftBack.initialize();
+        rangeSensorLeftBack.initialize();*/
 
         //----------------------    back sensors
 
@@ -168,10 +181,10 @@ public class RobotMecanum// extends Robot
         rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
 
         /*rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
-        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));*/
+        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
 
         rangeSensorBackLeft.initialize();
-        rangeSensorBackRight.initialize();
+        rangeSensorBackRight.initialize();*/
 
         // get a reference to our ColorSensor object.
         //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
@@ -739,7 +752,6 @@ public class RobotMecanum// extends Robot
     {
 
         telemetry.addData("turnGyro", "running");
-
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -862,13 +874,14 @@ public class RobotMecanum// extends Robot
     public void setLiftPosition(int numBlocks, double power)
     {
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        lift.setTargetPosition(numBlocks * TICKS_PER_BLOCK);
+        lift.setTargetPosition(numBlocks > 0? BASE_TICKS_OFF_GROUND + (numBlocks - 1) * TICKS_PER_BLOCK : 0);
+
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         lift.setPower(power);
 
-        while(lift.isBusy())
+        while(((LinearOpMode)opMode).opModeIsActive() && lift.isBusy())
         {
             telemetry.addData("Target Lift Position", lift.getTargetPosition());
             telemetry.addData("Lift Position", lift.getCurrentPosition());
