@@ -93,10 +93,23 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.drive(20, 0.75);
         robotMecanum.drive(-20, 0.75);
     */
-        sideFoundation(-1, 750, 1200, 1500, 80, 2000, 1000);
+        sideFoundation(-1, 750, 1200, 100, 2000, 2000, 2000, 2000, 1000);
         //robotMecanum.turnGyro(90,0.2,true);
     }
+    public void sideBricks(int isRedField, int drive1Time, int drive2Time, int strafeTime, int turnTime, int drive3Time, int strafe2Time, int driveBackTime, int driveBackTime2)
+    {
+        //isRedField is -1 for true
+        robotMecanum.omniTime(0.75, 0, drive1Time);
 
+        //claws down
+        robotMecanum.claw(false);
+
+        //drive backward
+        robotMecanum.omniTime(-0.6, 0, drive2Time);
+
+        //strafe sideways
+        robotMecanum.omniTime(0, 0.7, strafeTime);
+    }
     /**
      *drives and picks up foundation and moves foundation to target zone <br><br> <b>Note: time is in ms</b>
      *
@@ -106,9 +119,8 @@ public class AutonomousTest extends LinearOpMode
      * @param drive2Time time to drive foundation back    <i>Target: 6"</i>
      * @param turnTime time to turn foundation against wall
      * @param drive3Time time to drive foundation against wall <i>Target: 6"</i>
-     * @param drive4Time time to drive to park
      */
-    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnTime, int drive3Time, int drive4Time)
+    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnTime, int drive3Time, int strafe2Time, int driveBackTime, int driveBackTime2)
     {
         robotMecanum.setLiftPosition(1,0.9);
 
@@ -146,6 +158,8 @@ public class AutonomousTest extends LinearOpMode
             sleep(turnTime);
         }
         robotMecanum.moveOmni(0, 0, 0);
+
+        robotMecanum.omniTime(0.75, 0, drive3Time);
         //robotMecanum.gyro.resetZAxisIntegrator();
         /*if(isRedField == 1)
         {
@@ -163,11 +177,13 @@ public class AutonomousTest extends LinearOpMode
 
         robotMecanum.hooks(true);
 
-        robotMecanum.omniTime(0, isRedField * 0.75, drive3Time);
+        robotMecanum.omniTime(0, -isRedField*0.75, strafe2Time);
+
+        robotMecanum.omniTime(0.75, 0, driveBackTime);
 
         robotMecanum.setLiftPosition(0,0.75);
 
-        robotMecanum.omniTime(0,isRedField*0.75, drive4Time);
+        robotMecanum.omniTime(0.75,0, driveBackTime2);
     }
 
     /*
