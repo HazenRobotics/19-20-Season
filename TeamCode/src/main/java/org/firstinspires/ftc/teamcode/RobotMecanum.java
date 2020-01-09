@@ -242,8 +242,7 @@ public class RobotMecanum// extends Robot
 
         while(System.currentTimeMillis() - setTime < (time))
         {
-            moveOmni(drivePower, strafePower, gyroPID(180, opMode.getRuntime() - previousTime));
-            previousTime = opMode.getRuntime();
+            moveOmni(drivePower, strafePower,/* gyroPID(180, opMode.getRuntime() - previousTime)*/0);
         }
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
@@ -300,17 +299,15 @@ public class RobotMecanum// extends Robot
      *
      * @param delay - delay/wait time in SECONDS
      */
-    public void wait(double delay)
+    public void sleepRobot(long delay)
     {
-        while(!hasRun)
-        {
-            if(System.currentTimeMillis() - setTime > (delay* 1000))
-            {
-                hasRun = true;
-            }
-        }
+        long setTime = System.currentTimeMillis();
+        previousTime = opMode.getRuntime();
 
-        telemetry.addData("wait finished", "");
+        while(System.currentTimeMillis() - setTime < (delay))
+            previousTime = opMode.getRuntime();
+
+        telemetry.addData("Finished Sleep", "");
         telemetry.update();
     }
     public void initiateVuforia()

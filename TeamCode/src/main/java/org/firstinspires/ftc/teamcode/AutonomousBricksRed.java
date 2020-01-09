@@ -22,8 +22,7 @@ public class AutonomousBricksRed extends LinearOpMode
     RobotMecanum robotMecanum;
 
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
         //robotMecanum.initiateVuforia();
@@ -44,7 +43,7 @@ public class AutonomousBricksRed extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-
+        /*
         //drive forward
         robotMecanum.omniTime(0.7, 0, 1000);
         sleep(500);
@@ -78,8 +77,65 @@ public class AutonomousBricksRed extends LinearOpMode
         //drop
         robotMecanum.claw(false);
 
+         */
+
+        sideBricks(-1, 1100, 200, 1500, 2400, 200, 2800, 1000);
+
+    }
 
 
+    /**
+    * @param isRedField -1 means you are on the red field
+    * @param driveForwardTime1 the amount of time to drive forward to the first block
+    * @param driveBackTime the amount of time to move back to prepare to strafe
+    * @param strafeFoundationTime1 amount of time to strafe to the other side
+    * @param strafeBrickTime1 amount of time to strafe back to the bricks
+    * @param driveForwardTime2 amount of time to drive forward to the second/third block
+    * @param strafeFoundationTime2 amount of time to strafe to the other side
+    * @param strafeBrickTime2 amount of time to strafe back to the midline
+    */
+    public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2, int strafeFoundationTime2, int strafeBrickTime2)
+    {
+        //isRedField is -1 for
+        robotMecanum.omniTime(0.7, 0, driveForwardTime1);
+
+        claw("extended");
+        robotMecanum.sleepRobot(500);
+
+        robotMecanum.omniTime(-0.6, 0, driveBackTime);
+
+        robotMecanum.omniTime(0, 0.75 * -isRedField, strafeFoundationTime1);
+
+        claw("home");
+        robotMecanum.sleepRobot(500);
+
+        robotMecanum.omniTime(0, 0.75 * isRedField, strafeBrickTime1);
+
+        robotMecanum.omniTime(0.7, 0, driveForwardTime2);
+
+        claw("extended");
+        robotMecanum.sleepRobot(500);
+
+        robotMecanum.omniTime(0.6, 0, driveForwardTime2);
+
+        robotMecanum.omniTime(-0.6, 0, driveBackTime);
+
+        robotMecanum.omniTime(0, 0.75 * -isRedField, strafeFoundationTime2);
+
+        claw("home");
+        robotMecanum.sleepRobot(500);
+
+        robotMecanum.omniTime(0, 0.75 * isRedField, strafeBrickTime2);
+
+
+    }
+
+    public void claw(String clawHome)
+    {
+        if(clawHome.equalsIgnoreCase("home"))
+            robotMecanum.claw(true);
+        if(clawHome.equalsIgnoreCase("extended"))
+            robotMecanum.claw(false);
     }
     public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
     {
