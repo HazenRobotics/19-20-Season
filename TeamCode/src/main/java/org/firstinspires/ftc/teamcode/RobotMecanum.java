@@ -242,7 +242,7 @@ public class RobotMecanum// extends Robot
 
         while(System.currentTimeMillis() - setTime < (time))
         {
-            moveOmni(drivePower, strafePower,/* gyroPID(180, opMode.getRuntime() - previousTime)*/0);
+            moveOmni(drivePower, strafePower, /*gyroPID(180, opMode.getRuntime() - previousTime)*/0);
         }
         //sets all power to zero afterwords
         moveOmni(0, 0, 0);
@@ -909,6 +909,52 @@ public class RobotMecanum// extends Robot
     public double getBackDistance(ModernRoboticsI2cRangeSensor sensor)
     {
         return sensor.getDistance(DistanceUnit.INCH) - (double)ROBOT_LENGTH/2;
+    }
+
+    /**
+     * @param isRedField -1 means you are on the red field
+     * @param driveForwardTime1 the amount of time to drive forward to the first block
+     * @param driveBackTime the amount of time to move back to prepare to strafe
+     * @param strafeFoundationTime1 amount of time to strafe to the other side
+     * @param strafeBrickTime1 amount of time to strafe back to the bricks
+     * @param driveForwardTime2 amount of time to drive forward to the second/third block
+     * @param strafeFoundationTime2 amount of time to strafe to the other side
+     * @param strafeBrickTime2 amount of time to strafe back to the midline
+     */
+    public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2, int strafeFoundationTime2, int strafeBrickTime2)
+    {
+        //isRedField is -1 for
+        omniTime(0.7, 0, driveForwardTime1);
+
+        claw(false);
+        sleepRobot(500);
+
+        omniTime(-0.6, 0, driveBackTime);
+
+        omniTime(0, 0.75 * -isRedField, strafeFoundationTime1);
+
+        claw(true);
+        sleepRobot(500);
+
+        omniTime(0, 0.75 * isRedField, strafeBrickTime1);
+
+        omniTime(0.7, 0, driveForwardTime2);
+
+        claw(false);
+        sleepRobot(500);
+
+        omniTime(0.6, 0, driveForwardTime2);
+
+        omniTime(-0.6, 0, driveBackTime);
+
+        omniTime(0, 0.75 * -isRedField, strafeFoundationTime2);
+
+        claw(true);
+        sleepRobot(500);
+
+        omniTime(0, 0.75 * isRedField, strafeBrickTime2);
+
+
     }
 
 }

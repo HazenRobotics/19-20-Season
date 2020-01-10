@@ -48,7 +48,7 @@ public class AutonomousTest extends LinearOpMode
             robotMecanum.testSensors(false);
 */
 
-    /*
+        /*
         //robotMecanum.strafeTowardWall(0.75,16,false);
         telemetry.setAutoClear(false);
         //robotMecanum.strafe(-10,0.75);
@@ -66,34 +66,35 @@ public class AutonomousTest extends LinearOpMode
             robotMecanum.strafeRange(50, -0.75, true);
 
         }
+        */
+
+        /*
+            //step one, move forward to scan blocks
+            robotMecanum.driveTime(0.65, 1000);
+            robotMecanum.driveRange(14, 0.75);
+
+
+            //scan blocks ands organize information
+            robotMecanum.tensorFlowPrep();
+            sleep(5000);
+
+            //tensor flow driving to blocks
+            tensorFlowDrive();
     */
-
-
-/*
-        //step one, move forward to scan blocks
-        robotMecanum.driveTime(0.65, 1000);
-        robotMecanum.driveRange(14, 0.75);
-
-
-        //scan blocks ands organize information
-        robotMecanum.tensorFlowPrep();
-        sleep(5000);
-
-        //tensor flow driving to blocks
-        tensorFlowDrive();
-*/
 
         //return back to center
-        //skystoneReturn();
+            //skystoneReturn();
 
-        //robotMecanum.strafeRange(14.5, 0.75, true);
+            //robotMecanum.strafeRange(14.5, 0.75, true);
 
-    /*
-        //parking(true, false, 3);
-        robotMecanum.drive(20, 0.75);
-        robotMecanum.drive(-20, 0.75);
-    */
+        /*
+            //parking(true, false, 3);
+            robotMecanum.drive(20, 0.75);
+            robotMecanum.drive(-20, 0.75);
+        */
+
         sideFoundation(1, 750, 1200, 500, 2000, 2000, 500, 1000, 500);
+
         //robotMecanum.turnGyro(90,0.2,true);
     }
 

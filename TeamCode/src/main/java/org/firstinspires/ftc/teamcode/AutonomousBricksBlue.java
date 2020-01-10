@@ -44,6 +44,7 @@ public class AutonomousBricksBlue extends LinearOpMode
         //==========================================================================================
         //Official Start
 
+        /*
         //move forward to grab foundation
         robotMecanum.driveRange(36,0.65);
 
@@ -57,6 +58,9 @@ public class AutonomousBricksBlue extends LinearOpMode
         robotMecanum.claw(false);
 
         robotMecanum.strafeRange(65, -0.75, true);
+         */
+
+        robotMecanum.sideBricks(1, 0, 0, 0, 0, 0, 0, 0);
 
     }
     public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
