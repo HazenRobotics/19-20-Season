@@ -80,7 +80,7 @@ public class AutonomousBricksRed extends LinearOpMode
 
          */
 
-        robotMecanum.sideBricks(-1, 1100, 200, 1500, 2400, 200, 2800, 1000);
+        robotMecanum.sideBricks(-1, 1300, 350, 2000, 2600, 200, 2800, 1000);
 
     }
 
