@@ -22,8 +22,8 @@ public class TeleopMecanum extends OpMode
     {
         robotMecanum = new RobotMecanum(hardwareMap, this, true);
         robotMecanum.telemetry.setAutoClear(true);
-        //Thread ledThread = new LedThread();
-        //ledThread.start();
+        Thread ledThread = new LedThread();
+        ledThread.start();
     }
 
 
@@ -43,8 +43,8 @@ public class TeleopMecanum extends OpMode
         telemetry.addData("Hooks", "Gp2: y = home");
         telemetry.addData("Hooks", "Gp2: a = extended    \n");*/
 
-        telemetry.addData("Old Gyro  ", robotMecanum.gyro.getHeading());
-        telemetry.addData("New Gyro  ", robotMecanum.getNewGyroHeading());
+        /*telemetry.addData("Old Gyro  ", robotMecanum.gyro.getHeading());
+        telemetry.addData("New Gyro  ", robotMecanum.getNewGyroHeading());*/
         telemetry.addData("Lift      ", robotMecanum.lift.getCurrentPosition());
         telemetry.addData("front  left wheel", robotMecanum.frontLeftWheel.getCurrentPosition());
         telemetry.addData("back  left wheel", robotMecanum.backLeftWheel.getCurrentPosition());
@@ -74,15 +74,15 @@ public class TeleopMecanum extends OpMode
             robotMecanum.claw(false);
         }
 
-        //Claw
-        if(!(gamepad2.right_trigger == 0))
+        //Clapper
+        /*if(!(gamepad2.right_trigger == 0))
         {
             robotMecanum.capper(true);
         }
         else
         {
             robotMecanum.capper(false);
-        }
+        }*/
 
         //Servo Hooks
         if (gamepad2.y)
@@ -148,7 +148,7 @@ public class TeleopMecanum extends OpMode
         telemetry.update();
     }
 
-    /*private class LedThread extends Thread{
+    private class LedThread extends Thread{
         public LedThread(){
             this.setName("LedThread");
         }
@@ -166,7 +166,7 @@ public class TeleopMecanum extends OpMode
             }catch (InterruptedException e){}
             catch (Exception e){}
         }
-    }*/
+    }
 }
 
 

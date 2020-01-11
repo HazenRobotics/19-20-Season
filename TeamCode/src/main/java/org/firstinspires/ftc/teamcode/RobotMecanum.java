@@ -61,10 +61,10 @@ public class RobotMecanum// extends Robot
     final double CLAW_EXTENDED = convertDegreeToPercent(180,180);
     double clawPosition = CLAW_HOME;
 
-    Servo capper;
+    /*Servo capper;
     final double CAPPER_HOME = convertDegreeToPercent(120.0,360.0);
     final double CAPPER_EXTENDED = convertDegreeToPercent(360,360.0);
-    double capperPosition = CLAW_HOME;
+    double capperPosition = CLAW_HOME;*/
 
     GyroSensor gyro;
 
@@ -111,13 +111,15 @@ public class RobotMecanum// extends Robot
 
         //super(hMap, opMode);
 
-        telemetry.setAutoClear(true);
+        telemetry.setAutoClear(false);
 
         //----------------------    lift
         lift = hardwareMap.dcMotor.get("lift");
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addData("Lift", "Ready");
+        telemetry.update();
 
         //----------------------    motors/wheels
         frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
@@ -134,11 +136,15 @@ public class RobotMecanum// extends Robot
         backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addData("Wheels", "Ready");
+        telemetry.update();
 
         leftHook = hardwareMap.servo.get("left_hook");
         rightHook = hardwareMap.servo.get("right_hook");
 
         leftHook.setDirection(Servo.Direction.REVERSE);
+        telemetry.addData("Hooks", "Ready");
+        telemetry.update();
 
         //Reverse the two flipped wheels
         frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
@@ -147,46 +153,16 @@ public class RobotMecanum// extends Robot
         //----------------------    Claw
         claw = hardwareMap.servo.get("claw");
         claw.setDirection(Servo.Direction.REVERSE);
-
-        //----------------------    capper
-        capper = hardwareMap.servo.get("capper");
+        telemetry.addData("Claw", "Ready");
+        telemetry.update();
 
         //LED
-        /*colorR = hardwareMap.dcMotor.get("R");
-        colorG = hardwareMap.dcMotor.get("G");
-        colorB = hardwareMap.dcMotor.get("B");*/
+        colorR = hardwareMap.dcMotor.get("red");
+        colorG = hardwareMap.dcMotor.get("green");
+        colorB = hardwareMap.dcMotor.get("blue");
 
         //----------------------    gyro
-        gyro = hardwareMap.gyroSensor.get("gyro");
-        gyro.calibrate();
-        while (gyro.isCalibrating() && opModeIsActive());
 
-        //----------------------    side sensors
-        rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
-        rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
-        rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
-        rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
-
-        /*rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X78));
-        rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X76));
-        rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X28));
-        rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X26));
-
-        rangeSensorRightFront.initialize();
-        rangeSensorRightBack.initialize();
-        rangeSensorLeftFront.initialize();
-        rangeSensorLeftBack.initialize();*/
-
-        //----------------------    back sensors
-
-        rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
-        rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
-
-        /*rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
-        rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
-
-        rangeSensorBackLeft.initialize();
-        rangeSensorBackRight.initialize();*/
 
         // get a reference to our ColorSensor object.
         //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
@@ -200,8 +176,48 @@ public class RobotMecanum// extends Robot
         backLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        if(!isTeleOP)
+
+        if(!isTeleOP) {
+            gyro = hardwareMap.gyroSensor.get("gyro");
+            gyro.calibrate();
+            while (opModeIsActive() && gyro.isCalibrating());
+            telemetry.addData("Gyro", "Ready");
+            telemetry.update();
+
+            //----------------------    side sensors
+            rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
+            rangeSensorRightBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_back");
+            rangeSensorLeftFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_front");
+            rangeSensorLeftBack = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_left_back");
+
+            rangeSensorRightFront.setI2cAddress(I2cAddr.create8bit(0X76));
+            rangeSensorRightBack.setI2cAddress(I2cAddr.create8bit(0X78));
+            rangeSensorLeftFront.setI2cAddress(I2cAddr.create8bit(0X26));
+            //rangeSensorLeftBack.setI2cAddress(I2cAddr.create8bit(0X28));
+
+            rangeSensorRightFront.initialize();
+            rangeSensorRightBack.initialize();
+            rangeSensorLeftFront.initialize();
+            rangeSensorLeftBack.initialize();
+
+            //----------------------    back sensors
+
+            rangeSensorBackLeft = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_left");
+            rangeSensorBackRight = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_back_right");
+
+            rangeSensorBackLeft.setI2cAddress(I2cAddr.create8bit(0X46));
+            rangeSensorBackRight.setI2cAddress(I2cAddr.create8bit(0X48));
+
+            rangeSensorBackLeft.initialize();
+            rangeSensorBackRight.initialize();
+            telemetry.addData("Range Sensors", "Ready");
+            telemetry.update();
+
+
             tensorFlow = new TensorFlow(hardwareMap, opMode);
+
+
+        }
     }
 
     public void testSensors(boolean isCombinedSensors)
@@ -804,7 +820,7 @@ public class RobotMecanum// extends Robot
             moveOmni(0, 0, 0);
         }
     }
-    public void capper(boolean capperHome)
+    /*public void capper(boolean capperHome)
     {
         if (capperHome)
         {
@@ -819,7 +835,7 @@ public class RobotMecanum// extends Robot
 
         telemetry.addData("Capper Position: ", capper.getPosition());
         telemetry.update();
-    }
+    }*/
     public void claw(boolean clawHome)
     {
         if (clawHome)
@@ -980,6 +996,83 @@ public class RobotMecanum// extends Robot
 
 
     }
+    /**
+     *drives and picks up foundation and moves foundation to target zone <br><br> <b>Note: time is in ms</b>
+     *
+     * @param isRedField -1 if red and 1 if blue
+     * @param strafeTime time to align with middle of foundation <i>Target: 11"</i>
+     * @param drive1Time time to drive to foundation      <i>Target: 30"</i>
+     * @param drive2Time time to drive foundation back    <i>Target: 6"</i>
+     * @param turnTime time to turn foundation against wall
+     * @param drive3Time time to drive foundation against wall <i>Target: 6"</i>
+     */
+    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnTime, int drive3Time, int strafe2Time, int driveBackTime, int driveBackTime2)
+    {
+        setLiftPosition(1,0.9);
+
+
+        //strafeRange(16, 0.75, true);
+
+        //driveTime(0.65, 900);
+        omniTime(0, -isRedField * 0.75, strafeTime, true );
+        sleepRobot(250);
+        omniTime(0.7, 0, drive1Time, true );
+
+        sleepRobot(250);
+        //robotMecanum.driveRange(34, 0.7);
+        hooks(false);
+        sleepRobot(500);
+        omniTime(-0.75, 0, drive2Time, true );
+        sleepRobot(250);
+
+       /*double leftMove = 0, rightMove = 0;
+       if(isRedField == -1)
+            rightMove = -0.65;
+        else
+            leftMove = -0.65;*/
+
+        double rightMove = isRedField == -1 ? 0.65 : 0;
+        double leftMove = isRedField == -1 ? 0 : 0.65;
+
+        if(isRedField == 1)
+        {
+            moveMotors(leftMove, leftMove, rightMove, rightMove);
+            sleepRobot(turnTime);
+        }
+        if(isRedField == -1)
+        {
+            moveMotors(leftMove, leftMove, rightMove, rightMove);
+            sleepRobot(turnTime);
+        }
+        moveOmni(0, 0, 0);
+
+        omniTime(0.75, 0, drive3Time, true );
+        //gyro.resetZAxisIntegrator();
+        /*if(isRedField == 1)
+        {
+            while (getNewGyroHeading() < 180 + turnAngle)
+                moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }
+        if(isRedField == -1)
+        {
+            while (getNewGyroHeading() > 180 - turnAngle)
+                moveMotors(leftMove, leftMove, rightMove, rightMove);
+        }*/
+        //moveOmni(0.5,0, 0.5 * isRedField)
+
+        //omniTime(0.7, 0, drive3Time);
+
+        hooks(true);
+
+        omniTime(0, -isRedField*0.75, strafe2Time, true );
+
+        omniTime(-0.75, 0, driveBackTime, true );
+
+        setLiftPosition(0,0.75);
+
+        omniTime(-0.75,0, driveBackTime2, true );
+    }
+
 
     /**
      *
@@ -1009,11 +1102,11 @@ public class RobotMecanum// extends Robot
         }
     }
 
-    /*public void setRGB(double r, double g, double b){
+    public void setRGB(double r, double g, double b){
         colorR.setPower(r);
         colorG.setPower(g);
         colorB.setPower(b);
-    }*/
+    }
 
 }
 
