@@ -26,10 +26,6 @@ public class AutonomousBricksBlue extends LinearOpMode
     {
         robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
-        //robotMecanum.initiateVuforia();
-
-        robotMecanum.gyro.calibrate();
-
         //==========================================================================================
         //Pre init
 
@@ -60,7 +56,7 @@ public class AutonomousBricksBlue extends LinearOpMode
         robotMecanum.strafeRange(65, -0.75, true);
          */
 
-        robotMecanum.sideBricks(1, 0, 0, 0, 0, 0, 0, 0);
+        robotMecanum.sideBricks(1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     }
     public void sideFoundation(boolean isRedField, int waitTime, int strafe2Time, int drive1Time, int drive2Time)
@@ -72,15 +68,15 @@ public class AutonomousBricksBlue extends LinearOpMode
 
             //driveTime(0.65, 900);
 
-            robotMecanum.omniTime(0.75, 0, drive1Time);
+            robotMecanum.omniTime(0.75, 0, drive1Time, true );
             //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.omniTime(-0.75, 0, drive2Time);
+            robotMecanum.omniTime(-0.75, 0, drive2Time, true );
             //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.omniTime(0, 0.75, strafe2Time);
+            robotMecanum.omniTime(0, 0.75, strafe2Time, true );
 
             //robotMecanum.strafeRange(55, 0.75, true);
         }
@@ -90,15 +86,15 @@ public class AutonomousBricksBlue extends LinearOpMode
 
             //driveTime(0.65, 900);
 
-            robotMecanum.omniTime(0.75, 0, drive1Time);
+            robotMecanum.omniTime(0.75, 0, drive1Time, true );
             //robotMecanum.driveRange(34, 0.7);
             robotMecanum.hooks(false);
             sleep(250);
-            robotMecanum.omniTime(-0.75, 0, drive2Time);
+            robotMecanum.omniTime(-0.75, 0, drive2Time, true );
             //robotMecanum.driveRange(1, -0.75);
             robotMecanum.hooks(true);
 
-            robotMecanum.omniTime(0, 0.75, strafe2Time);
+            robotMecanum.omniTime(0, 0.75, strafe2Time, true );
             //robotMecanum.strafeRange(55, 0.75, false);
         }
         sleep(waitTime);

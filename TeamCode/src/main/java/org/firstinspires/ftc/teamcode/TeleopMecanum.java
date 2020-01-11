@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 //Import Code Libraries
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 //Define Code Name for phon
 @TeleOp(name="TeleOpMecanum")
@@ -14,6 +12,7 @@ public class TeleopMecanum extends OpMode
 {
 
     final double MAX_LIFT_SPEED = 1;
+    int sensitivityCount = 2;
 
     RobotMecanum robotMecanum;
 
@@ -23,6 +22,8 @@ public class TeleopMecanum extends OpMode
     {
         robotMecanum = new RobotMecanum(hardwareMap, this, true);
         robotMecanum.telemetry.setAutoClear(true);
+        //Thread ledThread = new LedThread();
+        //ledThread.start();
     }
 
 
@@ -61,7 +62,7 @@ public class TeleopMecanum extends OpMode
 
 
         //Lift
-        robotMecanum.lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
+        robotMecanum.lift.setPower(-gamepad2.left_stick_y * MAX_LIFT_SPEED);
 
         //Claw
         if(gamepad2.b)
@@ -92,9 +93,12 @@ public class TeleopMecanum extends OpMode
         {
             robotMecanum.hooks(false);
         }
+        
+        //sensitivityCount -= gamepad1.left_bumper && sensitivityCount >= 3 ? 1 : 0;
+        //sensitivityCount += gamepad1.right_bumper && sensitivityCount <= 5 ? 1 : 0;
 
         //Driving
-        robotMecanum.moveOmni(-gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_stick_x);
+        robotMecanum.moveOmniAdjustable(gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_stick_x, sensitivityCount);
 
         //robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
         //robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
@@ -143,6 +147,26 @@ public class TeleopMecanum extends OpMode
 
         telemetry.update();
     }
+
+    /*private class LedThread extends Thread{
+        public LedThread(){
+            this.setName("LedThread");
+        }
+
+        @Override
+        public void run(){
+            try{
+                while(!isInterrupted()){
+                    robotMecanum.setRGB(0,0,1);
+                    sleep(2000);
+                    robotMecanum.setRGB(1, 1,0);
+                    sleep(2000);
+                }
+
+            }catch (InterruptedException e){}
+            catch (Exception e){}
+        }
+    }*/
 }
 
 

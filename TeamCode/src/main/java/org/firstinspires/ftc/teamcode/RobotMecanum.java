@@ -1,8 +1,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,17 +12,9 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.util.Locale;
 
 public class RobotMecanum// extends Robot
 {
@@ -47,8 +38,8 @@ public class RobotMecanum// extends Robot
 
     DcMotor lift;
     final double MAX_LIFT_SPEED = 0.8;
-    final int TICKS_PER_BLOCK = -1600;
-    final int BASE_TICKS_OFF_GROUND = -350;
+    final int TICKS_PER_BLOCK = 1600;
+    final int BASE_TICKS_OFF_GROUND = 350;
 
     //Define Wheel Motors
     DcMotor frontLeftWheel;
@@ -88,12 +79,12 @@ public class RobotMecanum// extends Robot
     ModernRoboticsI2cRangeSensor rangeSensorBackRight;
     ModernRoboticsI2cRangeSensor rangeSensorBackLeft;
 
-    ColorSensor colorSensorLeft;    // 0x3A
+    /*ColorSensor colorSensorLeft;    // 0x3A
     ColorSensor colorSensorRight;    // 0x3C
 
 
     float hsvValues[] = {0F,0F,0F};     // hsvValues is an array that will hold the hue, saturation, and value information.
-    final float values[] = hsvValues;   // values is a reference to the hsvValues array.
+    final float values[] = hsvValues;   // values is a reference to the hsvValues array.*/
 
     boolean bLedOn = true;          // bLedOn represents the state of the LED.
 
@@ -104,6 +95,11 @@ public class RobotMecanum// extends Robot
     Telemetry telemetry;
 
     TensorFlow tensorFlow;
+
+    //LED
+    DcMotor colorR;
+    DcMotor colorG;
+    DcMotor colorB;
 
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode, boolean isTeleOP)
@@ -119,6 +115,7 @@ public class RobotMecanum// extends Robot
 
         //----------------------    lift
         lift = hardwareMap.dcMotor.get("lift");
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -154,10 +151,15 @@ public class RobotMecanum// extends Robot
         //----------------------    capper
         capper = hardwareMap.servo.get("capper");
 
+        //LED
+        /*colorR = hardwareMap.dcMotor.get("R");
+        colorG = hardwareMap.dcMotor.get("G");
+        colorB = hardwareMap.dcMotor.get("B");*/
+
         //----------------------    gyro
         gyro = hardwareMap.gyroSensor.get("gyro");
         gyro.calibrate();
-        while (gyro.isCalibrating());
+        while (gyro.isCalibrating() && opModeIsActive());
 
         //----------------------    side sensors
         rangeSensorRightFront = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor_right_front");
@@ -228,7 +230,7 @@ public class RobotMecanum// extends Robot
      * @param strafePower - sets power to strafe - negative power is left
      * @param time  - amount of time to run the motors in MILLISECONDS
      */
-    public void omniTime(double drivePower, double strafePower, long time)
+    public void omniTime(double drivePower, double strafePower, long time, boolean setPowerZero)
     {
         gyro.resetZAxisIntegrator();
         //set power to 'drive' motors
@@ -240,12 +242,14 @@ public class RobotMecanum// extends Robot
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
 
-        while(System.currentTimeMillis() - setTime < (time))
+        while(System.currentTimeMillis() - setTime < (time) && opModeIsActive())
         {
-            moveOmni(drivePower, strafePower, /*gyroPID(180, opMode.getRuntime() - previousTime)*/0);
+            moveOmni(drivePower, strafePower, gyroPID(180, opMode.getRuntime() - previousTime));
         }
+
         //sets all power to zero afterwords
-        moveOmni(0, 0, 0);
+        if(setPowerZero)
+            moveOmni(0, 0, 0);
     }
     /**
      * @param liftPower - sets power to the lift - negative power is supposedly down
@@ -263,7 +267,7 @@ public class RobotMecanum// extends Robot
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
 
-        while(System.currentTimeMillis() - setTime < (time))
+        while(System.currentTimeMillis() - setTime < (time) && opModeIsActive())
         {
             lift.setPower(liftPower * MAX_LIFT_SPEED);
             previousTime = opMode.getRuntime();
@@ -287,7 +291,7 @@ public class RobotMecanum// extends Robot
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
 
-        while(System.currentTimeMillis() - setTime < (time))
+        while(System.currentTimeMillis() - setTime < (time) && opModeIsActive())
         {
             moveOmni(0, 0, rotatePower);
             previousTime = opMode.getRuntime();
@@ -304,7 +308,7 @@ public class RobotMecanum// extends Robot
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
 
-        while(System.currentTimeMillis() - setTime < (delay))
+        while(System.currentTimeMillis() - setTime < (delay) && opModeIsActive())
             previousTime = opMode.getRuntime();
 
         telemetry.addData("Finished Sleep", "");
@@ -332,10 +336,29 @@ public class RobotMecanum// extends Robot
 
         return totalTicks;
     }
+
+    /**
+     *
+     * @param drivePower
+     * @param strafePower
+     * @param rotatePower
+     */
     public void moveOmni(double drivePower, double strafePower, double rotatePower)
     {
-        double drive = Math.signum(-drivePower) * Math.pow(drivePower, 2);
-        double strafe = Math.signum(-strafePower) * Math.pow(strafePower, 2);
+        moveOmniAdjustable(drivePower, strafePower, rotatePower, 2);
+    }
+
+    /**
+     * Applies power to the motors to control driving, strafing, and rotation. The amount of power is effected by the sensitivity.
+     * @param drivePower controls driving forward (+) and backward (-)
+     * @param strafePower controls strafing right(+) and left(-)
+     * @param rotatePower controls rotation right(+) and left(-)
+     * @param sensitivity changes exponent in power curve which changes the sensitivity to power input
+     */
+    public void moveOmniAdjustable(double drivePower, double strafePower, double rotatePower, int sensitivity){
+
+        double drive = (sensitivity % 2 == 0 ? Math.signum(-drivePower) : 1) * Math.pow(drivePower, sensitivity);
+        double strafe = (sensitivity % 2 == 0 ? Math.signum(-strafePower) : 1) * Math.pow(strafePower, sensitivity);
         double rotate = -rotatePower;
 
         double frontLeftPower = drive + strafe + rotate;
@@ -351,6 +374,7 @@ public class RobotMecanum// extends Robot
         telemetry.addData("backLeftPower", backLeftPower);
         telemetry.addData("frontRightPower", frontRightPower);
         telemetry.addData("backRightPower", backRightPower);*/
+
     }
 
     /**
@@ -508,7 +532,7 @@ public class RobotMecanum// extends Robot
         return success;
     }*/
 
-
+    @Deprecated
     private void runEncoders(boolean isDrive, double power)
     {
         backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -579,8 +603,8 @@ public class RobotMecanum// extends Robot
         //moveOmni(0, power, 0);
 
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while(     (power > 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
-                || (power < 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)      )
+        while(opModeIsActive() && (    (power > 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)
+                || (power < 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 > distanceFromWall)      ))
         {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
@@ -598,8 +622,8 @@ public class RobotMecanum// extends Robot
         telemetry.update();
 
         //moving towards a wall
-        while((power > 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
-                || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  )
+        while(opModeIsActive() && ((power > 0 && !isRightSensor && ( rangeSensorLeftFront.getDistance(DistanceUnit.INCH) +  rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)
+                || (power < 0 && isRightSensor  && (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2 < distanceFromWall)  ))
         {
             moveOmni(0, power, rangePID(0,rangeSensorBackLeft.getDistance(DistanceUnit.INCH), rangeSensorBackRight.getDistance(DistanceUnit.INCH)  , opMode.getRuntime() - previousTime) );
             telemetry.addData("distance from wall", rangeSensorRightFront.getDistance(DistanceUnit.INCH));
@@ -633,7 +657,7 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? power : -power;
         moveOmni(0, power, 0);
 
-        while(((LinearOpMode) opMode).opModeIsActive() && (usingRightSensors && (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2 > distanceFromWall)
+        while(opModeIsActive() && (usingRightSensors && (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2 > distanceFromWall)
                 || (!usingRightSensors && (getSideDistance(rangeSensorLeftFront) +  getSideDistance(rangeSensorLeftBack)) / 2 > distanceFromWall)) {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             previousTime = opMode.getRuntime();
@@ -664,8 +688,8 @@ public class RobotMecanum// extends Robot
         power = usingRightSensors? -power : power;
         moveOmni(0, power, 0);
 
-        while((usingRightSensors && getSideDistance(rangeSensorRightFront) < distanceFromWall)
-                || (!usingRightSensors && getSideDistance(rangeSensorLeftFront) < distanceFromWall))
+        while(opModeIsActive() && ((usingRightSensors && getSideDistance(rangeSensorRightFront) < distanceFromWall)
+                || (!usingRightSensors && getSideDistance(rangeSensorLeftFront) < distanceFromWall)))
         {
             moveOmni(0, power, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("rightA", (getSideDistance(rangeSensorRightFront) + getSideDistance(rangeSensorRightBack)) / 2) ;
@@ -688,8 +712,8 @@ public class RobotMecanum// extends Robot
         moveOmni(power, 0, 0);
 
         // while moving toward the right wall OR moving away from the left wall OR moving away from the right wall OR moving toward the left wall
-        while((power > 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 < distanceFromWall)
-                ||   (power < 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 > distanceFromWall) )
+        while(opModeIsActive() && ((power > 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 < distanceFromWall)
+                ||   (power < 0 && (getBackDistance(rangeSensorBackRight) + getBackDistance(rangeSensorBackLeft)) / 2 > distanceFromWall) ))
         {
             moveOmni(power, 0, gyroPID(180, opMode.getRuntime() - previousTime));
             telemetry.addData("distance from wall", getBackDistance(rangeSensorBackRight));
@@ -759,7 +783,7 @@ public class RobotMecanum// extends Robot
         {
             //mostly works --- turned right 270 when I wanted it to move 90 right at 0.7 power
             moveOmni(0, 0, -power);
-            while( getNewGyroHeading() > 180 - turningDegrees)
+            while(opModeIsActive() && getNewGyroHeading() > 180 - turningDegrees)
             {
                 telemetry.addData("New While:", getNewGyroHeading() > 180 - turningDegrees);
                 telemetry.addData("Heading + 180:", getNewGyroHeading());
@@ -771,7 +795,7 @@ public class RobotMecanum// extends Robot
         else
         {
             moveOmni(0, 0, power);
-            while( getNewGyroHeading() < 180 + turningDegrees)
+            while( opModeIsActive() && getNewGyroHeading() < 180 + turningDegrees)
             {
                 telemetry.addData("While:", getNewGyroHeading() < 180 + turningDegrees);
                 telemetry.addData("Heading + 180:", getNewGyroHeading());
@@ -848,7 +872,7 @@ public class RobotMecanum// extends Robot
         {
             tensorFlow.tensorFlow();
             //shuffle(0.2, 1);
-        }while(tensorFlow.needsShuffle);
+        }while(opModeIsActive() && tensorFlow.needsShuffle);
 
         if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)
             skystoneLocation = "none";
@@ -878,7 +902,7 @@ public class RobotMecanum// extends Robot
 
         lift.setPower(power);
 
-        while(((LinearOpMode)opMode).opModeIsActive() && lift.isBusy())
+        while(opModeIsActive() && lift.isBusy())
         {
             telemetry.addData("Target Lift Position", lift.getTargetPosition());
             telemetry.addData("Lift Position", lift.getCurrentPosition());
@@ -914,48 +938,82 @@ public class RobotMecanum// extends Robot
     /**
      * @param isRedField -1 means you are on the red field
      * @param driveForwardTime1 the amount of time to drive forward to the first block
-     * @param driveBackTime the amount of time to move back to prepare to strafe
+     * @param driveBackTime1 the amount of time to move back to prepare to strafe
      * @param strafeFoundationTime1 amount of time to strafe to the other side
      * @param strafeBrickTime1 amount of time to strafe back to the bricks
      * @param driveForwardTime2 amount of time to drive forward to the second/third block
      * @param strafeFoundationTime2 amount of time to strafe to the other side
      * @param strafeBrickTime2 amount of time to strafe back to the midline
      */
-    public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2, int strafeFoundationTime2, int strafeBrickTime2)
+    public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime1, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2,  int driveBackTime2, int strafeFoundationTime2, int strafeBrickTime2)
     {
         //isRedField is -1 for
-        omniTime(0.7, 0, driveForwardTime1);
+        omniTime(0.6, 0, driveForwardTime1, true);
 
         claw(false);
         sleepRobot(500);
 
-        omniTime(-0.6, 0, driveBackTime);
+        omniTime(-0.6, 0, driveBackTime1, true);
 
-        omniTime(0, 0.75 * -isRedField, strafeFoundationTime1);
+        omniTime(0, 0.8 * -isRedField, strafeFoundationTime1, true);
 
         claw(true);
         sleepRobot(500);
 
-        omniTime(0, 0.75 * isRedField, strafeBrickTime1);
+        omniTime(0, 0.8 * isRedField, strafeBrickTime1, true);
 
-        omniTime(0.7, 0, driveForwardTime2);
+        omniTime(0.7, 0, driveForwardTime2, true);
 
         claw(false);
         sleepRobot(500);
 
-        omniTime(0.6, 0, driveForwardTime2);
+        omniTime(0.6, 0, driveForwardTime2, true);
 
-        omniTime(-0.6, 0, driveBackTime);
+        omniTime(-0.6, 0, driveBackTime2, true);
 
-        omniTime(0, 0.75 * -isRedField, strafeFoundationTime2);
+        omniTime(0, 0.8 * -isRedField, strafeFoundationTime2, true);
 
         claw(true);
         sleepRobot(500);
 
-        omniTime(0, 0.75 * isRedField, strafeBrickTime2);
+        omniTime(0, 0.8 * isRedField, strafeBrickTime2, true);
 
 
     }
+
+    /**
+     *
+     * @param power amount of power to drive at
+     * @param increment
+     * @param totalTime
+     */
+    public void driveIncrement(double power, double increment, long totalTime)
+    {
+        long time = (int)(totalTime/(power/increment));
+
+        for(double i = 0.2; i < power; i += increment)
+        {
+            if(power % increment != 0 && !(i + increment < power))
+                omniTime(power, 0, time,true );
+            else
+                omniTime(i + increment, 0, time, false );
+        }
+    }
+
+    public boolean opModeIsActive()
+    {
+        try {
+            return ((LinearOpMode) opMode).opModeIsActive();
+        } catch (ClassCastException e){
+            return true;
+        }
+    }
+
+    /*public void setRGB(double r, double g, double b){
+        colorR.setPower(r);
+        colorG.setPower(g);
+        colorB.setPower(b);
+    }*/
 
 }
 

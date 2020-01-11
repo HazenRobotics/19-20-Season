@@ -42,6 +42,25 @@ public class AutonomousRightPark extends LinearOpMode
 
         waitForStart();
 
+        robotMecanum.frontLeftWheel.setPower(0.75);
+        sleep(1000);
+        robotMecanum.frontLeftWheel.setPower(0);
+        sleep(2000);
+
+        robotMecanum.frontRightWheel.setPower(0.75);
+        sleep(1000);
+        robotMecanum.frontRightWheel.setPower(0);
+        sleep(2000);
+
+        robotMecanum.backLeftWheel.setPower(0.75);
+        sleep(1000);
+        robotMecanum.backLeftWheel.setPower(0);
+        sleep(2000);
+
+        robotMecanum.backRightWheel.setPower(0.75);
+        sleep(1000);
+        robotMecanum.backRightWheel.setPower(0);
+
         //==========================================================================================
         //Official Start
 

@@ -27,15 +27,18 @@ import java.util.ArrayList;
 //@disabled
 public class AutonomousLeftPark extends LinearOpMode
 {
-    //==============================================================================================
+    RobotMecanum robotMecanum;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
-        RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this, false);
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
         //==========================================================================================
         //Pre init
+
+        robotMecanum.hooks(true);
+        robotMecanum.claw(true);
 
         telemetry.addData("init finished", "");
         telemetry.update();
@@ -45,6 +48,23 @@ public class AutonomousLeftPark extends LinearOpMode
         //==========================================================================================
         //Official Start
 
+        robotMecanum.omniTime(0.7, 0, 500, true);
+
+        robotMecanum.driveIncrement(0.75, 0.3, 3000);
+
     }
+
+    /*public void driveIncrement(double power, double increment, long totalTime)
+    {
+
+        long time = (int)(totalTime/increment);
+        for(double i = 0.2; i < power; i += increment)
+        {
+            if(power % increment != 0 && !(i + increment < power))
+                robotMecanum.omniTime(power, 0, time,true );
+            else
+                robotMecanum.omniTime(i + increment, 0, time, false );
+        }
+    }*/
 }
 

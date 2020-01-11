@@ -93,8 +93,8 @@ public class AutonomousTest extends LinearOpMode
             robotMecanum.drive(-20, 0.75);
         */
 
-        sideFoundation(1, 750, 1200, 500, 2000, 2000, 500, 1000, 500);
-
+        sideFoundation(-1, 750, 1200, 500, 2000, 2000, 500, 1000, 500);
+        //robotMecanum.driveIncrement(0.75, 0.2, 4000);
         //robotMecanum.turnGyro(90,0.2,true);
     }
 
@@ -112,31 +112,31 @@ public class AutonomousTest extends LinearOpMode
     {
         sleep(4000000);
         //isRedField is -1 for
-        robotMecanum.omniTime(0.7, 0, driveForwardTime1);
+        robotMecanum.omniTime(0.7, 0, driveForwardTime1, true );
 
         claw("extended");
         sleep(2300);
-        robotMecanum.omniTime(-0.6, 0, driveBackTime);
+        robotMecanum.omniTime(-0.6, 0, driveBackTime, true );
 
-        robotMecanum.omniTime(0, 0.7 * -isRedField, strafeFoundationTime1);
+        robotMecanum.omniTime(0, 0.7 * -isRedField, strafeFoundationTime1, true );
 
         claw("home");
         sleep(500);
-        robotMecanum.omniTime(0, 0.7 * isRedField, strafeBrickTime1);
+        robotMecanum.omniTime(0, 0.7 * isRedField, strafeBrickTime1, true );
 
-        robotMecanum.omniTime(0.7, 0, driveForwardTime2);
+        robotMecanum.omniTime(0.7, 0, driveForwardTime2, true );
 
         claw("extended");
         sleep(2300);
-        robotMecanum.omniTime(0.6, 0, driveForwardTime2);
+        robotMecanum.omniTime(0.6, 0, driveForwardTime2, true );
 
-        robotMecanum.omniTime(-0.6, 0, driveBackTime);
+        robotMecanum.omniTime(-0.6, 0, driveBackTime, true );
 
-        robotMecanum.omniTime(0, 0.7 * -isRedField, strafeFoundationTime2);
+        robotMecanum.omniTime(0, 0.7 * -isRedField, strafeFoundationTime2, true );
 
         claw("home");
         sleep(500);
-        robotMecanum.omniTime(0, 0.7 * isRedField, strafeBrickTime2);
+        robotMecanum.omniTime(0, 0.7 * isRedField, strafeBrickTime2, true );
 
 
     }
@@ -168,15 +168,15 @@ public class AutonomousTest extends LinearOpMode
         //robotMecanum.strafeRange(16, 0.75, true);
 
         //driveTime(0.65, 900);
-        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime);
+        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime, true );
         sleep(250);
-        robotMecanum.omniTime(0.7, 0, drive1Time);
+        robotMecanum.omniTime(0.7, 0, drive1Time, true );
 
         sleep(250);
         //robotMecanum.driveRange(34, 0.7);
         robotMecanum.hooks(false);
         sleep(500);
-        robotMecanum.omniTime(-0.75, 0, drive2Time);
+        robotMecanum.omniTime(-0.75, 0, drive2Time, true );
         sleep(250);
 
        /* if(isRedField == -1)
@@ -199,7 +199,7 @@ public class AutonomousTest extends LinearOpMode
         }
         robotMecanum.moveOmni(0, 0, 0);
 
-        robotMecanum.omniTime(0.75, 0, drive3Time);
+        robotMecanum.omniTime(0.75, 0, drive3Time, true );
         //robotMecanum.gyro.resetZAxisIntegrator();
         /*if(isRedField == 1)
         {
@@ -217,13 +217,13 @@ public class AutonomousTest extends LinearOpMode
 
         robotMecanum.hooks(true);
 
-        robotMecanum.omniTime(0, -isRedField*0.75, strafe2Time);
+        robotMecanum.omniTime(0, -isRedField*0.75, strafe2Time, true );
 
-        robotMecanum.omniTime(-0.75, 0, driveBackTime);
+        robotMecanum.omniTime(-0.75, 0, driveBackTime, true );
 
         robotMecanum.setLiftPosition(0,0.75);
 
-        robotMecanum.omniTime(-0.75,0, driveBackTime2);
+        robotMecanum.omniTime(-0.75,0, driveBackTime2, true );
     }
 
     /*

@@ -66,15 +66,15 @@ public class AutonomousFoundationBlue extends LinearOpMode
         //robotMecanum.strafeRange(16, 0.75, true);
 
         //driveTime(0.65, 900);
-        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime);
+        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime, true);
         sleep(250);
-        robotMecanum.omniTime(0.7, 0, drive1Time);
+        robotMecanum.omniTime(0.7, 0, drive1Time, true);
 
         sleep(250);
         //robotMecanum.driveRange(34, 0.7);
         robotMecanum.hooks(false);
         sleep(500);
-        robotMecanum.omniTime(-0.75, 0, drive2Time);
+        robotMecanum.omniTime(-0.75, 0, drive2Time, true);
         sleep(250);
 
        /* if(isRedField == -1)
@@ -98,9 +98,9 @@ public class AutonomousFoundationBlue extends LinearOpMode
         }
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
-        robotMecanum.omniTime(0.7, 0, drive3Time);
+        robotMecanum.omniTime(0.7, 0, drive3Time, true);
         robotMecanum.hooks(true);
-        robotMecanum.omniTime(-0.65, 0, drive4Time);
+        robotMecanum.omniTime(-0.65, 0, drive4Time, true);
     }
 
 }
