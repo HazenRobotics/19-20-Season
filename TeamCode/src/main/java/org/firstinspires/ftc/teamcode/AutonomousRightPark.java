@@ -23,7 +23,7 @@ import java.util.ArrayList;
 // backs up to the starting point using encoders to measure the distance.
 // This example assumes there is one encoder, attached to the left motor
 
-@Autonomous(name="Autonomous-RightPark")
+@Autonomous(name="Autonomous-RightPark-WheelsTest")
 //@disabled
 public class AutonomousRightPark extends LinearOpMode
 {
