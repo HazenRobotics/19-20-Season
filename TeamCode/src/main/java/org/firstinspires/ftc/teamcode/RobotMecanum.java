@@ -244,7 +244,7 @@ public class RobotMecanum// extends Robot
 
         while(System.currentTimeMillis() - setTime < (time) && opModeIsActive())
         {
-            moveOmni(drivePower, strafePower, gyroPID(180, opMode.getRuntime() - previousTime));
+            moveOmni(drivePower, strafePower, /*gyroPID(180, opMode.getRuntime() - previousTime)*/0);
         }
 
         //sets all power to zero afterwords

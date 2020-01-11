@@ -94,11 +94,11 @@ public class TeleopMecanum extends OpMode
             robotMecanum.hooks(false);
         }
         
-        //sensitivityCount -= gamepad1.left_bumper && sensitivityCount >= 3 ? 1 : 0;
-        //sensitivityCount += gamepad1.right_bumper && sensitivityCount <= 5 ? 1 : 0;
+        sensitivityCount -= gamepad1.left_bumper && sensitivityCount >= 3 ? 1 : 0;
+        sensitivityCount += gamepad1.right_bumper && sensitivityCount <= 5 ? 1 : 0;
 
         //Driving
-        robotMecanum.moveOmniAdjustable(gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_stick_x, sensitivityCount);
+        robotMecanum.moveOmniAdjustable(-gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_stick_x, sensitivityCount);
 
         //robotMecanum.rightHook.setPosition(gamepad1.right_trigger);
         //robotMecanum.leftHook.setPosition(gamepad1.left_trigger);
