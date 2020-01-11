@@ -44,40 +44,44 @@ public class AutonomousFoundationRed extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        sideFoundation(-1, 750, 1200, 400, 80, 500, 1750);
+        robotMecanum.sideFoundation(-1, 750, 1200, 500, 260, 2000, 500, 1000, 500);
+        //sideFoundation(-1, 750, 1200, 500, 80, 2000, 500, 1000, 500);
+        //robotMecanum.driveIncrement(0.75, 0.2, 4000);
+        //robotMecanum.turnGyro(90,0.2,true);
     }
+
+
 
     /**
      *drives and picks up foundation and moves foundation to target zone <br><br> <b>Note: time is in ms</b>
      *
-     * @param isRedField 1 if red and -1 if blue
+     * @param isRedField -1 if red and 1 if blue
      * @param strafeTime time to align with middle of foundation <i>Target: 11"</i>
      * @param drive1Time time to drive to foundation      <i>Target: 30"</i>
      * @param drive2Time time to drive foundation back    <i>Target: 6"</i>
-     * @param turnAngle angle need to turn foundation against wall
+     * @param turnTime time to turn foundation against wall
      * @param drive3Time time to drive foundation against wall <i>Target: 6"</i>
-     * @param drive4Time time to drive to park
      */
-    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnAngle, int drive3Time, int drive4Time)
+    public void sideFoundation(int isRedField, int strafeTime, int drive1Time, int drive2Time, int turnTime, int drive3Time, int strafe2Time, int driveBackTime, int driveBackTime2)
     {
-        robotMecanum.liftTime(0.5, 1000);
+        robotMecanum.setLiftPosition(1,0.9);
 
         //double leftMove = 0, rightMove = 0;
         //robotMecanum.strafeRange(16, 0.75, true);
 
         //driveTime(0.65, 900);
-        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime, true);
+        robotMecanum.omniTime(0, -isRedField * 0.75, strafeTime, true );
         sleep(250);
-        robotMecanum.omniTime(0.7, 0, drive1Time, true);
+        robotMecanum.omniTime(0.7, 0, drive1Time, true );
 
         sleep(250);
         //robotMecanum.driveRange(34, 0.7);
         robotMecanum.hooks(false);
         sleep(500);
-        robotMecanum.omniTime(-0.75, 0, drive2Time, true);
+        robotMecanum.omniTime(-0.75, 0, drive2Time, true );
         sleep(250);
 
-        /* if(isRedField == -1)
+       /* if(isRedField == -1)
             rightMove = -0.65;
         else
             leftMove = -0.65;*/
@@ -85,21 +89,33 @@ public class AutonomousFoundationRed extends LinearOpMode
         double rightMove = isRedField == -1 ? 0.65 : 0;
         double leftMove = isRedField == -1 ? 0 : 0.65;
 
-        robotMecanum.gyro.resetZAxisIntegrator();
         if(isRedField == 1)
         {
-            while (robotMecanum.getNewGyroHeading() < 180 + turnAngle)
+            while (robotMecanum.getNewGyroHeading() > 180 - turnTime)
                 robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
         }
         if(isRedField == -1)
         {
-            while (robotMecanum.getNewGyroHeading() > 180 - turnAngle)
+            while (robotMecanum.getNewGyroHeading() < 180 + turnTime)
                 robotMecanum.moveMotors(leftMove, leftMove, rightMove, rightMove);
         }
+        robotMecanum.moveOmni(0, 0, 0);
+
+        robotMecanum.omniTime(0.75, 0, drive3Time, true );
+        //robotMecanum.gyro.resetZAxisIntegrator();
+
         //robotMecanum.moveOmni(0.5,0, 0.5 * isRedField)
 
-        robotMecanum.omniTime(0.7, 0, drive3Time, true);
+        //robotMecanum.omniTime(0.7, 0, drive3Time);
+
         robotMecanum.hooks(true);
-        robotMecanum.omniTime(-0.65, 0, drive4Time, true);
+
+        robotMecanum.omniTime(0, -isRedField*0.75, strafe2Time, true );
+
+        robotMecanum.omniTime(-0.75, 0, driveBackTime, true );
+
+        robotMecanum.setLiftPosition(0,0.75);
+
+        robotMecanum.omniTime(-0.75,0, driveBackTime2, true );
     }
 }

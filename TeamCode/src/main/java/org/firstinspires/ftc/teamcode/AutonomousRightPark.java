@@ -19,50 +19,40 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.util.ArrayList;
 
-// autonomous program that drives bot forward a set distance, stops then
-// backs up to the starting point using encoders to measure the distance.
-// This example assumes there is one encoder, attached to the left motor
+// autonomous program that ???
 
-@Autonomous(name="Autonomous-RightPark")
+@Autonomous(name="Autonomous-InwardPark")
 //@disabled
 public class AutonomousRightPark extends LinearOpMode
 {
-    //==============================================================================================
+    RobotMecanum robotMecanum;
 
-    @Override
+
     public void runOpMode() throws InterruptedException
     {
-        RobotMecanum robotMecanum = new RobotMecanum(hardwareMap, this, false);
+        robotMecanum = new RobotMecanum(hardwareMap, this, false);
 
         //==========================================================================================
         //Pre init
+
+        telemetry.addData("Park on any side of the midline", "facing the midline");
+        telemetry.addData("So close to the midline that the", "hook can open over the midline");
+        telemetry.update();
+
+        robotMecanum.hooks(true);
+        robotMecanum.claw(true);
 
         telemetry.addData("init finished", "");
         telemetry.update();
 
         waitForStart();
 
-        robotMecanum.frontLeftWheel.setPower(0.75);
-        sleep(1000);
-        robotMecanum.frontLeftWheel.setPower(0);
-        sleep(2000);
-
-        robotMecanum.frontRightWheel.setPower(0.75);
-        sleep(1000);
-        robotMecanum.frontRightWheel.setPower(0);
-        sleep(2000);
-
-        robotMecanum.backLeftWheel.setPower(0.75);
-        sleep(1000);
-        robotMecanum.backLeftWheel.setPower(0);
-        sleep(2000);
-
-        robotMecanum.backRightWheel.setPower(0.75);
-        sleep(1000);
-        robotMecanum.backRightWheel.setPower(0);
-
         //==========================================================================================
         //Official Start
+
+        robotMecanum.omniTime(0.7, 0, 200, true);
+        robotMecanum.claw(false);
+        sleep(750);
 
     }
 }

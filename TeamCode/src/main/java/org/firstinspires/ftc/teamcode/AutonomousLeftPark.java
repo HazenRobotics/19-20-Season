@@ -19,11 +19,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.util.ArrayList;
 
-// autonomous program that drives bot forward a set distance, stops then
-// backs up to the starting point using encoders to measure the distance.
-// This example assumes there is one encoder, attached to the left motor
+// autonomous program that ???
 
-@Autonomous(name="Autonomous-LeftPark")
+@Autonomous(name="Autonomous-OuterPark")
 //@disabled
 public class AutonomousLeftPark extends LinearOpMode
 {
@@ -37,6 +35,9 @@ public class AutonomousLeftPark extends LinearOpMode
         //==========================================================================================
         //Pre init
 
+        telemetry.addData("Park to the right of the midline", "facing the midline");
+        telemetry.update();
+
         robotMecanum.hooks(true);
         robotMecanum.claw(true);
 
@@ -48,23 +49,11 @@ public class AutonomousLeftPark extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        robotMecanum.omniTime(0.7, 0, 500, true);
+        robotMecanum.omniTime(0, 0.7, 1600, true);
+        robotMecanum.omniTime(0.7, 0, 800, true);
 
-        robotMecanum.driveIncrement(0.75, 0.3, 3000);
+        //robotMecanum.driveIncrement(0.75, 0.3, 3000);
 
     }
-
-    /*public void driveIncrement(double power, double increment, long totalTime)
-    {
-
-        long time = (int)(totalTime/increment);
-        for(double i = 0.2; i < power; i += increment)
-        {
-            if(power % increment != 0 && !(i + increment < power))
-                robotMecanum.omniTime(power, 0, time,true );
-            else
-                robotMecanum.omniTime(i + increment, 0, time, false );
-        }
-    }*/
 }
 

@@ -93,10 +93,12 @@ public class AutonomousTest extends LinearOpMode
             robotMecanum.drive(-20, 0.75);
         */
 
-        sideFoundation(-1, 750, 1200, 500, 2000, 2000, 500, 1000, 500);
+        robotMecanum.sideFoundation(-1, 750, 1200, 500, 260, 2000, 500, 1000, 500);
+
         //robotMecanum.driveIncrement(0.75, 0.2, 4000);
         //robotMecanum.turnGyro(90,0.2,true);
     }
+
 
     /**
      * @param isRedField -1 means you are on the red field
@@ -108,7 +110,7 @@ public class AutonomousTest extends LinearOpMode
      * @param strafeFoundationTime2 amount of time to strafe to the other side
      * @param strafeBrickTime2 amount of time to strafe back to the midline
      */
-    public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2, int strafeFoundationTime2, int strafeBrickTime2)
+    /*public void sideBricks(int isRedField, int driveForwardTime1, int driveBackTime, int strafeFoundationTime1, int strafeBrickTime1, int driveForwardTime2, int strafeFoundationTime2, int strafeBrickTime2)
     {
         sleep(4000000);
         //isRedField is -1 for
@@ -139,7 +141,7 @@ public class AutonomousTest extends LinearOpMode
         robotMecanum.omniTime(0, 0.7 * isRedField, strafeBrickTime2, true );
 
 
-    }
+    }*
 
     public void claw(String clawHome)
     {
