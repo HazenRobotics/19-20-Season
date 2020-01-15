@@ -50,7 +50,7 @@ public class AutonomousLeftPark extends LinearOpMode
         //Official Start
 
         robotMecanum.omniTime(0, 0.7, 1600, true);
-        robotMecanum.omniTime(0.7, 0, 8000, true);
+        robotMecanum.omniTime(0.7, 0, 800, true);
 
         //robotMecanum.driveIncrement(0.75, 0.3, 3000);
 

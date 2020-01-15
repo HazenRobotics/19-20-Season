@@ -44,7 +44,8 @@ public class AutonomousFoundationRed extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        sideFoundation(-1, 750, 1200, 500, 80, 2000, 500, 1000, 500);
+        robotMecanum.sideFoundation(-1, 750, 1200, 500, 260, 2000, 500, 1000, 500);
+        //sideFoundation(-1, 750, 1200, 500, 80, 2000, 500, 1000, 500);
         //robotMecanum.driveIncrement(0.75, 0.2, 4000);
         //robotMecanum.turnGyro(90,0.2,true);
     }

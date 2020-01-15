@@ -27,7 +27,7 @@ public class AutonomousRightPark extends LinearOpMode
 {
     RobotMecanum robotMecanum;
 
-    @Override
+
     public void runOpMode() throws InterruptedException
     {
         robotMecanum = new RobotMecanum(hardwareMap, this, false);
@@ -36,6 +36,7 @@ public class AutonomousRightPark extends LinearOpMode
         //Pre init
 
         telemetry.addData("Park on any side of the midline", "facing the midline");
+        telemetry.addData("So close to the midline that the", "hook can open over the midline");
         telemetry.update();
 
         robotMecanum.hooks(true);
@@ -49,7 +50,9 @@ public class AutonomousRightPark extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        robotMecanum.omniTime(0.7, 0, 800, true);
+        robotMecanum.omniTime(0.7, 0, 200, true);
+        robotMecanum.claw(false);
+        sleep(750);
 
     }
 }

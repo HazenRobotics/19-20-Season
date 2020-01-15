@@ -104,10 +104,10 @@ public class RobotMecanum// extends Robot
     //==============================================================================================   Robot method
     public RobotMecanum(HardwareMap hMap, OpMode opMode, boolean isTeleOP)
     {
-        hardwareMap = hMap;
+        this.hardwareMap = hMap;
         this.opMode = opMode;
         //this.opMode = (LinearOpMode) opMode;
-        telemetry = opMode.telemetry;
+        this.telemetry = opMode.telemetry;
 
         //super(hMap, opMode);
 
@@ -115,27 +115,27 @@ public class RobotMecanum// extends Robot
 
         //----------------------    lift
         lift = hardwareMap.dcMotor.get("lift");
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         telemetry.addData("Lift", "Ready");
         telemetry.update();
 
         //----------------------    motors/wheels
-        frontLeftWheel = hardwareMap.dcMotor.get("front_left_wheel");
+        frontLeftWheel = hardwareMap.get(DcMotor.class, "front_left_wheel");
+        backLeftWheel = hardwareMap.get(DcMotor.class, "back_left_wheel");
+        frontRightWheel = hardwareMap.get(DcMotor.class, "front_left_wheel");
+        backRightWheel = hardwareMap.get(DcMotor.class, "front_right_wheel");
+
+
+        telemetry.addData("new wheels", "initialized");
+        telemetry.update();
+        sleepRobot(2000);
+
+/*
         backLeftWheel = hardwareMap.dcMotor.get("back_left_wheel");
         frontRightWheel = hardwareMap.dcMotor.get("front_right_wheel");
         backRightWheel = hardwareMap.dcMotor.get("back_right_wheel");
+*/
 
-        frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         telemetry.addData("Wheels", "Ready");
         telemetry.update();
 
@@ -143,12 +143,11 @@ public class RobotMecanum// extends Robot
         rightHook = hardwareMap.servo.get("right_hook");
 
         leftHook.setDirection(Servo.Direction.REVERSE);
+        rightHook.setDirection(Servo.Direction.REVERSE);
         telemetry.addData("Hooks", "Ready");
         telemetry.update();
 
         //Reverse the two flipped wheels
-        frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
-        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
         //----------------------    Claw
         claw = hardwareMap.servo.get("claw");
@@ -161,8 +160,24 @@ public class RobotMecanum// extends Robot
         colorG = hardwareMap.dcMotor.get("green");
         colorB = hardwareMap.dcMotor.get("blue");
 
-        //----------------------    gyro
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+
+        //----------------------    gyro
 
         // get a reference to our ColorSensor object.
         //colorSensorLeft = hardwareMap.get(ColorSensor.class, "sensor_color_left");
@@ -175,9 +190,8 @@ public class RobotMecanum// extends Robot
         backRightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-
-        if(!isTeleOP) {
+        if(!isTeleOP)
+        {
             gyro = hardwareMap.gyroSensor.get("gyro");
             gyro.calibrate();
             while (opModeIsActive() && gyro.isCalibrating());
@@ -213,14 +227,12 @@ public class RobotMecanum// extends Robot
             telemetry.addData("Range Sensors", "Ready");
             telemetry.update();
 
-
-            tensorFlow = new TensorFlow(hardwareMap, opMode);
-
+            //tensorFlow = new TensorFlow(hardwareMap, opMode);
 
         }
     }
 
-    public void testSensors(boolean isCombinedSensors)
+    public void testSensors(boolean isCombinedRangeSensors)
     {
         telemetry.addData("Right Front", rangeSensorRightFront.getDistance(DistanceUnit.INCH) );
         telemetry.addData("Right Back", rangeSensorRightBack.getDistance(DistanceUnit.INCH) );
@@ -229,7 +241,7 @@ public class RobotMecanum// extends Robot
         telemetry.addData("Back Right", rangeSensorBackRight.getDistance(DistanceUnit.INCH) );
         telemetry.addData("Back Left", rangeSensorBackLeft.getDistance(DistanceUnit.INCH) );
 
-        if(isCombinedSensors)
+        if(isCombinedRangeSensors)
         {
             telemetry.addData("Right Sensors", (rangeSensorRightFront.getDistance(DistanceUnit.INCH) + rangeSensorRightBack.getDistance(DistanceUnit.INCH)) / 2);
             telemetry.addData("Left Sensors", (rangeSensorLeftFront.getDistance(DistanceUnit.INCH) + rangeSensorLeftBack.getDistance(DistanceUnit.INCH)) / 2);

@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 //Import Code Libraries
+import android.sax.TextElementListener;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import static java.lang.Thread.sleep;
 
 
 //Define Code Name for phon
@@ -11,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class TeleopMecanum extends OpMode
 {
 
-    final double MAX_LIFT_SPEED = 1;
+    final double MAX_LIFT_SPEED = 0.9;
     int sensitivityCount = 2;
 
     RobotMecanum robotMecanum;
@@ -21,9 +25,16 @@ public class TeleopMecanum extends OpMode
     public void init()
     {
         robotMecanum = new RobotMecanum(hardwareMap, this, true);
+        telemetry.addData("robotMecanum setup", "finished");
+        telemetry.update();
+        //sleep(2000);
+        robotMecanum.sleepRobot(2000);
+
         robotMecanum.telemetry.setAutoClear(true);
-        Thread ledThread = new LedThread();
-        ledThread.start();
+        /*Thread ledThread = new LedThread();
+        ledThread.start();*/
+        telemetry.addData("init", "finished");
+        telemetry.update();
     }
 
 
@@ -46,8 +57,8 @@ public class TeleopMecanum extends OpMode
         /*telemetry.addData("Old Gyro  ", robotMecanum.gyro.getHeading());
         telemetry.addData("New Gyro  ", robotMecanum.getNewGyroHeading());*/
         telemetry.addData("Lift      ", robotMecanum.lift.getCurrentPosition());
-        telemetry.addData("front  left wheel", robotMecanum.frontLeftWheel.getCurrentPosition());
-        telemetry.addData("back  left wheel", robotMecanum.backLeftWheel.getCurrentPosition());
+        telemetry.addData("front left wheel", robotMecanum.frontLeftWheel.getCurrentPosition());
+        telemetry.addData("back left wheel", robotMecanum.backLeftWheel.getCurrentPosition());
         telemetry.addData("front right wheel", robotMecanum.frontRightWheel.getCurrentPosition());
         telemetry.addData("back right wheel", robotMecanum.backRightWheel.getCurrentPosition());
 
@@ -148,22 +159,28 @@ public class TeleopMecanum extends OpMode
         telemetry.update();
     }
 
-    private class LedThread extends Thread{
-        public LedThread(){
+    private class LedThread extends Thread
+    {
+        public LedThread()
+        {
             this.setName("LedThread");
         }
 
         @Override
-        public void run(){
-            try{
-                while(!isInterrupted()){
+        public void run()
+        {
+            try
+            {
+                while(!isInterrupted())
+                {
                     robotMecanum.setRGB(0,0,1);
                     sleep(2000);
                     robotMecanum.setRGB(1, 1,0);
                     sleep(2000);
                 }
 
-            }catch (InterruptedException e){}
+            }
+            catch (InterruptedException e){}
             catch (Exception e){}
         }
     }
