@@ -69,6 +69,12 @@ public class RobotArduino
         leftWheel = hardwareMap.dcMotor.get("left_motor");
         rightWheel = hardwareMap.dcMotor.get("right_motor");
 
+        leftWheel.setDirection(DcMotor.Direction.FORWARD);
+        rightWheel.setDirection(DcMotor.Direction.REVERSE);
+
+        leftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         colorSensorLeft = hardwareMap.get(ModernRoboticsI2cColorSensor.class, "color_sensor_left");
         colorSensorMiddle = hardwareMap.get(ModernRoboticsI2cColorSensor.class, "color_sensor_middle");
         colorSensorRight = hardwareMap.get(ModernRoboticsI2cColorSensor.class, "color_sensor_right");
@@ -276,7 +282,7 @@ public class RobotArduino
         long setTime = System.currentTimeMillis();
         previousTime = opMode.getRuntime();
 
-        while(System.currentTimeMillis() - setTime < (delay) && ((LinearOpMode) opMode).opModeIsActive())
+        while(System.currentTimeMillis() - setTime < (delay) && ((LinearOpMode) opMode).opModeIsActive() )
             previousTime = opMode.getRuntime();
 
         telemetry.addData("Finished Sleep", "");
@@ -338,20 +344,57 @@ public class RobotArduino
     public void turningMovements()
     {
         double turningPower = 0.5;
-        int turningDegrees = 5;
+        //int turningDegrees = 5;
         boolean usesLeftWheel = false;
 
         if ( needToTurnLeft() )
             usesLeftWheel = true;
 
-        if ( needToTurnModerately() )
-            turningDegrees *= 2;
+        /*if ( needToTurnModerately() )
+            turningDegrees *= 2;*/
 
-        turn(turningDegrees, turningPower, true, usesLeftWheel);
+        //turn(turningDegrees, turningPower, true, usesLeftWheel);
         //turn(0, 0, true, true);
+
+        turnTime(0.6, 200, usesLeftWheel);
 
         telemetry.addData("turningMovements", "finished");
         telemetry.update();
+    }
+    public void moveTime(double power, long time)
+    {
+        //wait for certain amount of time while motors are running
+        //robotMecanum.wait(time);
+        long setTime = System.currentTimeMillis();
+        previousTime = opMode.getRuntime();
+
+        while( System.currentTimeMillis() - setTime < (time) && ((LinearOpMode) opMode).opModeIsActive() )
+        {
+            leftWheel.setPower(power);
+            rightWheel.setPower(power);
+        }
+
+        //sets all power to zero afterwords
+        leftWheel.setPower(0);
+        rightWheel.setPower(0);
+    }
+    public void turnTime(double power, long time, boolean usesLeftWheel)
+    {
+        //wait for certain amount of time while motors are running
+        //robotMecanum.wait(time);
+        long setTime = System.currentTimeMillis();
+        previousTime = opMode.getRuntime();
+
+        if(usesLeftWheel)
+            while( System.currentTimeMillis() - setTime < (time) && ((LinearOpMode) opMode).opModeIsActive() )
+                leftWheel.setPower(power);
+        else
+            while( System.currentTimeMillis() - setTime < (time) && ((LinearOpMode) opMode).opModeIsActive() )
+                rightWheel.setPower(power);
+
+        //sets all power to zero afterwords
+        leftWheel.setPower(0);
+        rightWheel.setPower(0);
     }
 
 }

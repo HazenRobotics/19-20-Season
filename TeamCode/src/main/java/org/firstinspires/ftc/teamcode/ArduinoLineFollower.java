@@ -16,6 +16,7 @@ public class ArduinoLineFollower extends LinearOpMode
 
     //======================================================
     int loopTest = 0;
+    final double POWER = 0.6;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -33,19 +34,12 @@ public class ArduinoLineFollower extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-        while( opModeIsActive() )
-        {
-            robotArduino.move(5, 0.6, true);
-            robotArduino.turnOnSpot(180, 0.6, true);
-            robotArduino.move(10, 0.6, true);
-            robotArduino.turn(10, 0.6, true, false);
-            break;
-        }
 
-        /*
+
         while( opModeIsActive() )
         {
-            robotArduino.move(1, 0.6, true);
+            robotArduino.leftWheel.setPower(POWER);
+            robotArduino.rightWheel.setPower(POWER);
 
             robotArduino.turningMovements();
 
@@ -53,7 +47,7 @@ public class ArduinoLineFollower extends LinearOpMode
 
             telemetry.update();
         }
-         */
+
     }
 }
 
