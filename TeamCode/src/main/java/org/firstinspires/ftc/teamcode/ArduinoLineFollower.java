@@ -16,7 +16,7 @@ public class ArduinoLineFollower extends LinearOpMode
 
     //======================================================
     int loopTest = 0;
-    final double POWER = 0.6;
+    final double POWER = 0.5;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -34,17 +34,25 @@ public class ArduinoLineFollower extends LinearOpMode
         //==========================================================================================
         //Official Start
 
-
-
         while( opModeIsActive() )
         {
-            robotArduino.leftWheel.setPower(POWER);
-            robotArduino.rightWheel.setPower(POWER);
+            //robotArduino.turningMovements(POWER);
 
-            robotArduino.turningMovements();
+            if(robotArduino.needToTurnLeft())
+                robotArduino.turnTime(POWER, 100, true);
+            else if(!robotArduino.needToTurnLeft())
+                robotArduino.turnTime(POWER, 100, true);
 
-            telemetry.addData( "loop test", loopTest++  );
+            if(  !robotArduino.colorSensorIsBlack( robotArduino.colorSensorLeft )  &&  robotArduino.colorSensorIsBlack( robotArduino.colorSensorMiddle )  &&  !robotArduino.colorSensorIsBlack( robotArduino.colorSensorRight ) )
+            {
+                robotArduino.leftWheel.setPower(POWER);
+                robotArduino.rightWheel.setPower(POWER);
+            }
 
+            telemetry.addData( "colorSensorLeft " , robotArduino.colorSensorIsBlack( robotArduino.colorSensorLeft ) );
+            telemetry.addData( "colorSensorLeft " , robotArduino.colorSensorIsBlack( robotArduino.colorSensorMiddle ) );
+            telemetry.addData( "colorSensorLeft " , robotArduino.colorSensorIsBlack( robotArduino.colorSensorRight ) );
+            telemetry.addData( "loop " + loopTest++, "complete" );
             telemetry.update();
         }
 
