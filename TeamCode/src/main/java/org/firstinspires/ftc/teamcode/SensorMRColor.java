@@ -72,7 +72,7 @@ public class SensorMRColor extends OpMode
 
 
     }
-/*
+
   final float[] values = {0F,0F,0F};
 
   OpMode opMode;
@@ -82,41 +82,42 @@ public class SensorMRColor extends OpMode
   ColorSensor colorSensorLeft;    // 0x3A
   ColorSensor colorSensorRight;    // 0x3C
 
-  public SensorMRColor(HardwareMap hMap, OpMode opMode)
-  {
-    hardwareMap = hMap;
-    this.opMode = opMode;
-    //this.opMode = (LinearOpMode) opMode;
-    telemetry = opMode.telemetry;
+    public SensorMRColor(HardwareMap hMap, OpMode opMode)
+    {
+        hardwareMap = hMap;
+        this.opMode = opMode;
+        //this.opMode = (LinearOpMode) opMode;
+        telemetry = opMode.telemetry;
 
-    // hsvValues is an array that will hold the hue, saturation, and value information.
-    float[] hsvValues = {0F,0F,0F};
+        // hsvValues is an array that will hold the hue, saturation, and value information.
+        float[] hsvValues = {0F,0F,0F};
 
-    // values is a reference to the hsvValues array.
-    //values = hsvValues;
+        // values is a reference to the hsvValues array.
+        //values = hsvValues;
 
-    // bLedOn represents the state of the LED.
-    boolean bLedOn = true;
+        // bLedOn represents the state of the LED.
+        boolean bLedOn = true;
 
-    // Set the LED in the beginning
-    colorSensorLeft.enableLed(bLedOn);
-    colorSensorRight.enableLed(bLedOn);
+        // Set the LED in the beginning
+        colorSensorLeft.enableLed(bLedOn);
+        colorSensorRight.enableLed(bLedOn);
 
-    // convert the RGB values to HSV values.
-    Color.RGBToHSV(colorSensorLeft.red() * 8, colorSensorLeft.green() * 8, colorSensorLeft.blue() * 8, hsvValues);
-    Color.RGBToHSV(colorSensorRight.red() * 8, colorSensorRight.green() * 8, colorSensorRight.blue() * 8, hsvValues);
+        // convert the RGB values to HSV values.
+        Color.RGBToHSV(colorSensorLeft.red() * 8, colorSensorLeft.green() * 8, colorSensorLeft.blue() * 8, hsvValues);
+        Color.RGBToHSV(colorSensorRight.red() * 8, colorSensorRight.green() * 8, colorSensorRight.blue() * 8, hsvValues);
 
-    // send the info back to driver station using telemetry function.
-    telemetry.addData("LED", bLedOn ? "On" : "Off");
-    telemetry.addData("Clear", colorSensorLeft.alpha());
-    telemetry.addData("Red  ", colorSensorLeft.red());
-    telemetry.addData("Green", colorSensorLeft.green());
-    telemetry.addData("Blue ", colorSensorLeft.blue());
-    telemetry.addData("Clear", colorSensorRight.alpha());
-    telemetry.addData("Red  ", colorSensorRight.red());
-    telemetry.addData("Green", colorSensorRight.green());
-    telemetry.addData("Blue ", colorSensorRight.blue());
-    telemetry.update();
+        // send the info back to driver station using telemetry function.
+        telemetry.addData("LED", bLedOn ? "On" : "Off");
+        telemetry.addData("Clear", colorSensorLeft.alpha());
+        telemetry.addData("Red  ", colorSensorLeft.red());
+        telemetry.addData("Green", colorSensorLeft.green());
+        telemetry.addData("Blue ", colorSensorLeft.blue());
+
+        telemetry.addData("Clear", colorSensorRight.alpha());
+        telemetry.addData("Red  ", colorSensorRight.red());
+        telemetry.addData("Green", colorSensorRight.green());
+        telemetry.addData("Blue ", colorSensorRight.blue());
+        telemetry.update();
     }
-*/
+
 }
