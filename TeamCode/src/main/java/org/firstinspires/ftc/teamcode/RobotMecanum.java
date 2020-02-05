@@ -364,6 +364,9 @@ public class RobotMecanum// extends Robot
 
         return totalTicks;
     }
+    public double convertTicksDist(double ticks){
+        return TICK_PER_REVOLUTION / GEAR_RATIO * WHEEL_DIAMETER;
+    }
 
     /**
      *
