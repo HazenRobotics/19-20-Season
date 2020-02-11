@@ -12,12 +12,12 @@ import java.util.List;
 public class RobotRoadRunner {
     PIDFController controller;
     PIDCoefficients coeff;
-    MecanumDrive robot;
+    MecanumDrive drive;
     RobotMecanum robotMecanum;
 
     public RobotRoadRunner(HardwareMap hMap, OpMode opMode){
         robotMecanum = new RobotMecanum(hMap, opMode, false);
-        robot = new MecanumDrive(0, 0, 0, 0) {
+        drive = new MecanumDrive(0, 0, 0, 0, 0) {
             @Override
             public void setMotorPowers(double v, double v1, double v2, double v3) {
                 robotMecanum.moveMotors(v, v1, v3, v2);
@@ -25,7 +25,7 @@ public class RobotRoadRunner {
 
             @Override
             public List<Double> getWheelPositions() {
-                List<Double> positions = new ArrayList<Double>();
+                List<Double> positions = new ArrayList<>();
                 positions.add(robotMecanum.convertTicksDist(robotMecanum.frontLeftWheel.getCurrentPosition()));
                 positions.add(robotMecanum.convertTicksDist(robotMecanum.backLeftWheel.getCurrentPosition()));
                 positions.add(robotMecanum.convertTicksDist(robotMecanum.backRightWheel.getCurrentPosition()));
