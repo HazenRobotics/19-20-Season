@@ -1,6 +1,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+
 import com.acmerobotics.roadrunner.followers.RamseteFollower;
 import com.acmerobotics.roadrunner.path.Path;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -44,7 +46,11 @@ public class RoadRunnerRedBlock extends LinearOpMode
 
         RamseteFollower follower = new RamseteFollower(2.0, 0.7);
 
-        follower.followTrajectory(TrajectoryLoader.load(new File("red_block_to_foundation.yaml")));
+        try {
+            follower.followTrajectory(TrajectoryLoader.load(hardwareMap.appContext.getAssets()));
+        }catch (Exception e){
+            telemetry.addData("Error", e);
+        }
 
         while(follower.isFollowing() && opModeIsActive()){
             robot.drive.setDriveSignal(follower.update(robot.drive.getPoseEstimate()));
