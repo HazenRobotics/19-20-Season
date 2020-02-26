@@ -1,18 +1,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.content.Context;
-
 import com.acmerobotics.roadrunner.followers.RamseteFollower;
-import com.acmerobotics.roadrunner.path.Path;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryGenerator;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryLoader;
+import com.acmerobotics.roadrunner.trajectory.config.TrajectoryConfig;
+import com.acmerobotics.roadrunner.*;
+import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.io.File;
+import java.io.InputStream;
 
 // autonomous program that drives bot forward a set distance, stops then
 // backs up to the starting point using encoders to measure the distance.
@@ -23,6 +25,7 @@ import java.io.File;
 public class RoadRunnerRedBlock extends LinearOpMode
 {
     RobotRoadRunner robot;
+    Trajectory trajectory;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -39,6 +42,23 @@ public class RoadRunnerRedBlock extends LinearOpMode
         robot.robotMecanum.hooks(true);
         robot.robotMecanum.claw(true);
 
+        /*try{
+            trajectory = TrajectoryLoader.load(new File("trajectory/Test.yaml"));
+        }catch (Exception e){
+            telemetry.addData("Error", e.toString());
+            telemetry.update();
+        }*/
+        File trajectoryFile;
+
+        try{
+            trajectoryFile = new File("Test.yaml");
+        }catch (Exception e){
+            telemetry.addData("Error", e.toString());
+            telemetry.update();
+        }
+
+        trajectory = new TrajectoryBuilder()
+
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
 
@@ -46,13 +66,10 @@ public class RoadRunnerRedBlock extends LinearOpMode
 
         RamseteFollower follower = new RamseteFollower(2.0, 0.7);
 
-        try {
-            follower.followTrajectory(TrajectoryLoader.load(hardwareMap.appContext.getAssets()));
-        }catch (Exception e){
-            telemetry.addData("Error", e);
-        }
+        follower.followTrajectory(trajectory);
 
-        while(follower.isFollowing() && opModeIsActive()){
+
+        while(opModeIsActive() && follower.isFollowing()){
             robot.drive.setDriveSignal(follower.update(robot.drive.getPoseEstimate()));
         }
 
