@@ -57,7 +57,7 @@ public class RoadRunnerRedBlock extends LinearOpMode
             telemetry.update();
         }
 
-        trajectory = new TrajectoryBuilder()
+        //trajectory = new TrajectoryBuilder();
 
         telemetry.addData("Step 1", "init finished");
         telemetry.update();
