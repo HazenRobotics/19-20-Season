@@ -277,15 +277,8 @@ public class FtcRobotControllerActivity extends Activity
     // Quick check: should we pretend we're not here, and so allow the Lynx to operate as
     // a stand-alone USB-connected module?
     if (LynxConstants.isRevControlHub()) {
-      if (LynxConstants.shouldDisableAndroidBoard()) {
-        // Double-sure check that the Lynx Module can operate over USB, etc, then get out of Dodge
-        RobotLog.vv(TAG, "disabling Dragonboard and exiting robot controller");
-        AndroidBoard.getInstance().getAndroidBoardIsPresentPin().setState(false);
-        AppUtil.getInstance().finishRootActivityAndExitApp();
-      } else {
-        // Double-sure check that we can talk to the DB over the serial TTY
-        AndroidBoard.getInstance().getAndroidBoardIsPresentPin().setState(true);
-      }
+      // Double-sure check that we can talk to the DB over the serial TTY
+      AndroidBoard.getInstance().getAndroidBoardIsPresentPin().setState(true);
     }
 
     context = this;
@@ -317,7 +310,6 @@ public class FtcRobotControllerActivity extends Activity
           }
         });
         popupMenu.inflate(R.menu.ftc_robot_controller);
-        FtcDashboard.populateMenu(popupMenu.getMenu());
         popupMenu.show();
       }
     });
@@ -385,6 +377,8 @@ public class FtcRobotControllerActivity extends Activity
     if (preferencesHelper.readBoolean(getString(R.string.pref_wifi_automute), false)) {
       initWifiMute(true);
     }
+
+    //FtcAboutActivity.setBuildTimeFromBuildConfig(BuildConfig.BUILD_TIME);
 
     FtcDashboard.start();
   }
@@ -485,6 +479,7 @@ public class FtcRobotControllerActivity extends Activity
   }
 
   protected void logPackageVersions() {
+    RobotLog.logBuildConfig(com.qualcomm.ftcrobotcontroller.BuildConfig.class);
     RobotLog.logBuildConfig(com.qualcomm.robotcore.BuildConfig.class);
     RobotLog.logBuildConfig(com.qualcomm.hardware.BuildConfig.class);
     RobotLog.logBuildConfig(com.qualcomm.ftccommon.BuildConfig.class);
@@ -520,21 +515,14 @@ public class FtcRobotControllerActivity extends Activity
   }
 
   @Override
-  public void onWindowFocusChanged(boolean hasFocus){
+  public void onWindowFocusChanged(boolean hasFocus) {
     super.onWindowFocusChanged(hasFocus);
-    // When the window loses focus (e.g., the action overflow is shown),
-    // cancel any pending hide action. When the window gains focus,
-    // hide the system UI.
+
     if (hasFocus) {
-      if (ImmersiveMode.apiOver19()){
-        // Immersive flag only works on API 19 and above.
-        immersion.hideSystemUI();
-      }
-    } else {
-      immersion.cancelSystemUIHide();
+      immersion.hideSystemUI();
+      getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
     }
   }
-
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -604,7 +592,25 @@ public class FtcRobotControllerActivity extends Activity
       return true;
     }
     else if (id == R.id.action_exit_app) {
-      finish();
+
+      //Clear backstack and everything to prevent edge case where VM might be
+      //restarted (after it was exited) if more than one activity was on the
+      //backstack for some reason.
+      finishAffinity();
+
+      //For lollipop and up, we can clear ourselves from the recents list too
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> tasks = manager.getAppTasks();
+
+        for (ActivityManager.AppTask task : tasks) {
+          task.finishAndRemoveTask();
+        }
+      }
+
+      //Finally, nuke the VM from orbit
+      AppUtil.getInstance().exitApplication();
+
       return true;
     }
 

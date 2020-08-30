@@ -90,10 +90,8 @@ public class TensorFlow
     {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
 
-        if (ClassFactory.getInstance().canCreateTFObjectDetector())
-            initTfod();
-        else
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+
+        initTfod();
         telemetry.update();
 
         /**
