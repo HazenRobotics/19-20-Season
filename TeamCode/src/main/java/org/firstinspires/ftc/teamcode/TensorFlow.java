@@ -214,11 +214,8 @@ public class TensorFlow extends LinearOpMode
 
         sleep(2000);
 
-        if (ClassFactory.getInstance().canCreateTFObjectDetector())
-            initTfod();
 
-        else
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        initTfod();
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.

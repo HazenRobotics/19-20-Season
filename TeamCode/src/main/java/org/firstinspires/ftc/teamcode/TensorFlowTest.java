@@ -83,11 +83,7 @@ public class TensorFlowTest extends LinearOpMode
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
         initVuforia();
 
-        if (ClassFactory.getInstance().canCreateTFObjectDetector())
-            initTfod();
-
-        else
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        initTfod();
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
@@ -153,8 +149,7 @@ public class TensorFlowTest extends LinearOpMode
 
      //Initialize the TensorFlow Object Detection engine.
 
-    private void initTfod()
-    {
+    private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfodParameters.minimumConfidence = 0.8; //Originally: 0.8
