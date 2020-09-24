@@ -28,6 +28,8 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import android.hardware.camera2.CameraDevice;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -47,7 +49,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "Concept: TensorFlow Object Detection", group = "Concept")
+@TeleOp(name = "-Use- TensorFlow Object Detection", group = "Concept")
 //@Disabled
 public class TensorFlowTest extends LinearOpMode
 {
@@ -83,12 +85,18 @@ public class TensorFlowTest extends LinearOpMode
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
         initVuforia();
 
-        initTfod();
+        if (ClassFactory.getInstance().canCreateTFObjectDetector())
+            initTfod();
+
+        else
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
          * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
          **/
+
+
         if (tfod != null)
             tfod.activate();
 
@@ -149,7 +157,8 @@ public class TensorFlowTest extends LinearOpMode
 
      //Initialize the TensorFlow Object Detection engine.
 
-    private void initTfod() {
+    private void initTfod()
+    {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfodParameters.minimumConfidence = 0.8; //Originally: 0.8

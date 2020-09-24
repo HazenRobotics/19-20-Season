@@ -1,15 +1,22 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.app.SharedElementCallback;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorMRRangeSensor;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.android.AndroidGyroscope;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -18,11 +25,11 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Robot extends LinearOpMode
+public class Robot
 {
     //======================================================
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    DcMotor backLeftWheel;
+    DcMotor backRightWheel;
 
     //======================================================
     DcMotor lift;
@@ -53,40 +60,109 @@ public class Robot extends LinearOpMode
 
     //======================================================
     final int tickPerRevlolution = 1440;
-    final double linearWheelDistance = (Math.PI) * 4;
+    final double linearWheelDistance = (Math.PI) * 4;//.314961;
     final double linearSpoolDistance = (Math.PI) * 1.5748;
 
     //======================================================
     enum Position{none,left,right};
-    Position skystonePosition;
-
-    int noneTally;
-    int leftTally;
-    int rightTally;
-    int totalTally;
-
-    final int IMAGE_CHECK_ITERATIONS = 2;
 
     //======================================================
-    int shuffleCount = 0;
+    int shuffleCount = 1;
 
-    //==============================================================================================
+    HardwareMap hardwareMap;
+    OpMode opMode;
+    //LinearOpMode opMode;
+    Telemetry telemetry;
 
-    @Override
-    public void runOpMode() throws InterruptedException { }
+    TensorFlow tensorFlow;
 
-    //=========================================================================================
-    //Lift method
-    public void setlift(double liftPower)
+    //==============================================================================================   Robot method
+    public Robot(HardwareMap hMap, OpMode opMode)
     {
-        telemetry.addData("setLift", "running");
+        hardwareMap = hMap;
+        this.opMode = opMode;
+        //this.opMode = (LinearOpMode) opMode;
+        telemetry = opMode.telemetry;
+
+        //Map Hardware
+        lift = hardwareMap.dcMotor.get("lift");
+
+        backLeftWheel = hardwareMap.dcMotor.get("back_left_motor");
+        backRightWheel = hardwareMap.dcMotor.get("back_right_motor");
+
+        leftHook = hardwareMap.servo.get("left_hook");
+        rightHook = hardwareMap.servo.get("right_hook");
+
+        leftClapper = hardwareMap.servo.get("left_clapper");
+        rightClapper = hardwareMap.servo.get("right_clapper");
+
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        gyro.calibrate();
+
+        tensorFlow = new TensorFlow(hardwareMap, opMode);
+
+        tensorFlow.initVuforia();
+
+        telemetry.addData("Robot", "finished setting up hardware");
+        telemetry.update();
+    }
+    //==============================================================================================   hardwareChoose
+    public void hardwareChoose(double hi)
+    {
+
+    }
+    //==============================================================================================   Lift
+    public void lift(double distance,double liftPower, boolean isRight)
+    {
+        telemetry.addData("lift", "running");
         telemetry.update();
 
-        convertDistTicks(5.5, linearSpoolDistance);
-    }
+        /*if (gamepad2.left_stick_y > 0)
+        {
+            lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED * 0.4);
+            telemetry.addData("Lift", "down");
+        }
+        else if (gamepad2.left_stick_y < 0)
+        {
+            lift.setPower(gamepad2.left_stick_y * MAX_LIFT_SPEED);
+            telemetry.addData("Lift", "up");
+        }
+        else
+        {
+            lift.setPower(0);
+        }*/
 
-    //==========================================================================================
-    //clapper method
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        if (isRight)
+        {
+            lift.setDirection(DcMotor.Direction.FORWARD);
+        }
+        else
+        {
+            lift.setDirection(DcMotor.Direction.REVERSE);
+        }
+        // set left motor to run to 5000 encoder counts.
+        lift.setTargetPosition(convertDistTicks(5.5, linearSpoolDistance));
+
+        // set both motors to 25% power. Movement will start.
+        lift.setPower(liftPower);
+
+        // set left motor to run to target encoder position and stop with brakes on.
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (lift.isBusy())
+        {
+            telemetry.addData("encoder-fwd", lift.getCurrentPosition()
+                    + "  busy=" + lift.isBusy());
+            telemetry.update();
+        }
+
+        // set motor power to zero to turn off motors. The motors stop on their own but
+        // power is still applied so we turn off the power.
+        lift.setPower(0.0);
+    }
+    //==============================================================================================   clapper
     public void clapper(boolean clappersHome)
     {
         telemetry.addData("clappers", "running");
@@ -106,10 +182,7 @@ public class Robot extends LinearOpMode
         leftClapper.setPosition(leftClapperPosition);
         rightClapper.setPosition(rightClapperPosition);
     }
-
-
-    //==========================================================================================
-    //hook methd
+    //==============================================================================================   hooks
     public void hooks(boolean hooksHome)
     {
         telemetry.addData("hooks", "running");
@@ -129,9 +202,7 @@ public class Robot extends LinearOpMode
         leftHook.setPosition(leftHookPosition);
         rightHook.setPosition(rightHookPosition);
     }
-
-    //==============================================================================================
-
+    //==============================================================================================   convertDistTicks
     //method takes in 2nd parameter for circumfrence of spinning object
     public int convertDistTicks(double distanceToTravel, double circumfrence)
     {
@@ -143,61 +214,58 @@ public class Robot extends LinearOpMode
 
         return totalTicks;
     }
-
+    //==============================================================================================   move
     public void move(double distanceToTravel,double power, boolean isForward)
     {
-        telemetry.addData("move", "running");
+        telemetry.addData("move method", "running");
         telemetry.update();
 
         // reset encoder count kept by left motor.
-        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         if (isForward)
         {
-            rightMotor.setDirection(DcMotor.Direction.REVERSE);
-            leftMotor.setDirection(DcMotor.Direction.FORWARD);
+            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
         }
         else
         {
-            rightMotor.setDirection(DcMotor.Direction.FORWARD);
-            leftMotor.setDirection(DcMotor.Direction.REVERSE);
+            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
+            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
         }
-
         // set left motor to run to 5000 encoder counts.
-        leftMotor.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
-        rightMotor.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
-
+        backLeftWheel.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
+        backRightWheel.setTargetPosition(convertDistTicks(distanceToTravel, linearWheelDistance));
         // set both motors to 25% power. Movement will start.
-        leftMotor.setPower(power);
-        rightMotor.setPower(power);
+        backLeftWheel.setPower(power);
+        backRightWheel.setPower(power);
 
         // set left motor to run to target encoder position and stop with brakes on.
-        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // wait while opmode is active and left motor is busy running to position.
-        while (opModeIsActive() && leftMotor.isBusy())
+        // wait while opmode is active and motors are busy running to position.
+
+        while (backLeftWheel.isBusy())
         {
-            telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
+            telemetry.addData("encoder-fwd", backLeftWheel.getCurrentPosition()
+                    + "  busy=" + backLeftWheel.isBusy());
             telemetry.update();
-            idle();
         }
-        while (opModeIsActive() && rightMotor.isBusy())
+        while (backRightWheel.isBusy())
         {
-            telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
+            telemetry.addData("encoder-fwd", backRightWheel.getCurrentPosition()
+                    + "  busy=" + backRightWheel.isBusy());
             telemetry.update();
-            idle();
         }
 
         // set motor power to zero to turn off motors. The motors stop on their own but
         // power is still applied so we turn off the power.
-        leftMotor.setPower(0.0);
-        rightMotor.setPower(0.0);
+        backLeftWheel.setPower(0.0);
+        backRightWheel.setPower(0.0);
     }
-
-
-
+    //==============================================================================================   turnOnSpot
     public void turnOnSpot(double turningDegrees, double power, boolean turnLeft)
     {
         telemetry.addData("turnOnSpot", "running");
@@ -207,24 +275,22 @@ public class Robot extends LinearOpMode
         double onSpotTurningNumber = turningNumber/2;
 
         // reset encoder count kept by left motor.
-        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //forward direction switching both wheels for turning in spot
         if(turnLeft)
         {
-            rightMotor.setDirection(DcMotor.Direction.FORWARD);
-            leftMotor.setDirection(DcMotor.Direction.FORWARD);
+            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
+            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
         }
         else
         {
-            rightMotor.setDirection(DcMotor.Direction.REVERSE);
-            leftMotor.setDirection(DcMotor.Direction.REVERSE);
+            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
         }
     }
-
-
-    //turning method
+    //==============================================================================================   turn
     public void turn(double turningDegrees, double power, boolean isForward, boolean leftWheel)
     {
         telemetry.addData("turn", "running");
@@ -242,108 +308,257 @@ public class Robot extends LinearOpMode
 
         if (isForward)
         {
-            rightMotor.setDirection(DcMotor.Direction.REVERSE);
-            leftMotor.setDirection(DcMotor.Direction.FORWARD);
-
+            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
         }
         else
         {
-            rightMotor.setDirection(DcMotor.Direction.FORWARD);
-            leftMotor.setDirection(DcMotor.Direction.REVERSE);
+            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
+            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
         }
 
         //if wheel is left:
         if(leftWheel)
         {
             // reset encoder count kept by left motor.
-            leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // set left motor to run to 5000 encoder counts.
-            leftMotor.setTargetPosition(convertDistTicks(turningNumber,linearWheelDistance));
+            backLeftWheel.setTargetPosition(convertDistTicks(turningNumber,linearWheelDistance));
 
             // set both motors to 25% power. Movement will start.
-            leftMotor.setPower(power);
+            backLeftWheel.setPower(power);
 
             // set left motor to run to target encoder position and stop with brakes on.
-            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backLeftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (opModeIsActive() && leftMotor.isBusy()) {
-                telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition() + "  busy=" + leftMotor.isBusy());
+            /*while (leftMotor.isBusy()) {
+                telemetry.addData("encoder-fwd", leftMotor.getCurrentPosition()
+                        + "  busy=" + leftMotor.isBusy());
                 telemetry.update();
-                idle();
-            }
+            }*/
 
             // set motor power to zero to turn off motors. The motors stop on their own but
             // power is still applied so we turn off the power.
-            leftMotor.setPower(0.0);
+            backLeftWheel.setPower(0.0);
         }
 
         //if wheel is right:
         else
         {
             // reset encoder count kept by left motor.
-            rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // set left motor to run to 5000 encoder counts.
-            rightMotor.setTargetPosition(convertDistTicks(turningNumber,linearWheelDistance));
+            backRightWheel.setTargetPosition(convertDistTicks(turningNumber,linearWheelDistance));
 
             // set both motors to 25% power. Movement will start.
-            rightMotor.setPower(power);
+            backRightWheel.setPower(power);
 
             // set left motor to run to target encoder position and stop with brakes on.
-            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backRightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // wait while opmode is active and left motor is busy running to position.
-            while (opModeIsActive() && rightMotor.isBusy())
+            /*while (rightMotor.isBusy())
             {
-                telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition() + "  busy=" + rightMotor.isBusy());
+                telemetry.addData("encoder-fwd", rightMotor.getCurrentPosition()
+                        + "  busy=" + rightMotor.isBusy());
                 telemetry.update();
-                idle();
-            }
+            }*/
 
             // set motor power to zero to turn off motors. The motors stop on their own but
             // power is still applied so we turn off the power.
-            leftMotor.setPower(0.0);
-            rightMotor.setPower(0.0);
+            backLeftWheel.setPower(0.0);
+            backRightWheel.setPower(0.0);
         }
     }
-
+    //==============================================================================================   turnGyro
     public void turnGyro(double turningDegrees, double power, boolean turnRight)
     {
         telemetry.addData("turnGyro", "running");
         telemetry.update();
 
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         gyro.resetZAxisIntegrator();
         if(turnRight)
         {
-            rightMotor.setDirection(DcMotor.Direction.FORWARD);
-            leftMotor.setDirection(DcMotor.Direction.FORWARD);
+            backRightWheel.setDirection(DcMotor.Direction.FORWARD);
+            backLeftWheel.setDirection(DcMotor.Direction.FORWARD);
 
-            rightMotor.setPower(power);
-            leftMotor.setPower(power);
+            backRightWheel.setPower(power);
+            backLeftWheel.setPower(power);
 
             while(gyro.getHeading() + 180 < 180 - turningDegrees) {}
         }
         else
         {
-            rightMotor.setDirection(DcMotor.Direction.REVERSE);
-            leftMotor.setDirection(DcMotor.Direction.REVERSE);
+            backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+            backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
-            rightMotor.setPower(power);
-            leftMotor.setPower(power);
+            backRightWheel.setPower(power);
+            backLeftWheel.setPower(power);
 
             while(gyro.getHeading() + 180 < 180 + turningDegrees) {}
         }
 
-        rightMotor.setPower(0);
-        leftMotor.setPower(0);
+        backRightWheel.setPower(0);
+        backLeftWheel.setPower(0);
 
-        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+    //==============================================================================================   skystoneNone
+    public void skystoneNone()
+    {
+        telemetry.addData("skystoneNone", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        move(12, 1, true);
+
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(12, 1, false);
+
+        //move to the preplanned position
+        move(12, 1, true);
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+    //==============================================================================================   skystoneLeft
+    public void skystoneLeft()
+    {
+        telemetry.addData("skystoneLeft", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        turnOnSpot(90, 0.1, true);
+        move(8, 1, true);
+        turnOnSpot(90, 0.1, false);
+
+
+        move(10, 1, true);
+
+
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(12, 1, false);
+
+        //move to the preplanned position
+        turnOnSpot(90, 0.1, false);
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+    //==============================================================================================   skystoneRight
+    public void skystoneRight()
+    {
+        telemetry.addData("skystoneRight", "running");
+        telemetry.update();
+        //Position to pick up skystone
+
+        //Dive and pick up skystone
+        move(10, 1, true);
+        clapper(false);
+
+        //Back up with skystone and rotate
+        move(6, 1, false);
+
+        //move to the preplanned position
+        turn(90,1,false,false);
+
+        move(6, 1, true);
+
+        //Run method to return place skystone on foundation
+        skystoneReturn();
+    }
+    //==============================================================================================   skystoneReturn
+    public void skystoneReturn()
+    {
+        move(36, 1, true);
+    }
+    //==============================================================================================   shuffle
+    public void shuffle()
+    {
+        //Move Shuffle
+        if (shuffleCount <= 3)
+        {
+            move(shuffleCount*2, 0.1, true);
+            move(shuffleCount*2, 0.1, false);
+        }
+        else if (shuffleCount <= 5)
+        {
+            move(shuffleCount, 0.1, false);
+            move(shuffleCount, 0.1, true);
+        }
+
+        //Turn Shuffle
+        if (shuffleCount == 6)
+        {
+            turn(10, 0.1, true, false);
+            turn(10, 0.1, false, false);
+        }
+        else if (shuffleCount == 8)
+        {
+            turn(15, 0.1, true, false);
+            turn(15, 0.1, false, false);
+        }
+        else if (shuffleCount == 10)
+        {
+            turn(20, 0.1, true, true);
+            turn(20, 0.1, false, true);
+        }
+        else if (shuffleCount == 12)
+        {
+            turn(25, 0.1, true, true);
+            turn(25, 0.1, false, true);
+        }
+
+
+        telemetry.addData("Shuffle Count", shuffleCount);
+        telemetry.update();
+        shuffleCount++;
+    }
+    //==============================================================================================   tensorFlowDrive
+    public void tensorFlowDrive()
+    {
+        do
+        {
+            tensorFlow.tensorFlow();
+            shuffle();
+        }while(tensorFlow.needsShuffle);
+
+        if (tensorFlow.getSkystonePosition() == TensorFlow.Position.none)
+        {
+            telemetry.addData("move to the skystone offscreen", "");
+            skystoneNone();
+        }
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.left)
+        {
+            telemetry.addData("move to the left skystone position", "");
+            skystoneLeft();
+        }
+        else if (tensorFlow.getSkystonePosition() == TensorFlow.Position.right)
+        {
+            telemetry.addData("move to the right skystone position", "");
+            skystoneRight();
+        }
+        else
+            telemetry.addData("Error: ", "No Move");
+        telemetry.update();
+    }
+
+    public boolean needsShuffle()
+    {
+        return tensorFlow.needsShuffle();
     }
 }
 
